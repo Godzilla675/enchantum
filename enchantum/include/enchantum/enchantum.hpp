@@ -4,6 +4,7 @@
 #include "details/optional.hpp"
 #include "details/string_view.hpp"
 #include "entries.hpp"
+#include "generators.hpp"
 #include <bit>
 #include <type_traits>
 #include <utility>
@@ -26,44 +27,7 @@ namespace details {
 
 } // namespace details
 
-template<typename>
-inline constexpr bool has_zero_flag = false;
 
-template<BitFlagEnum E>
-inline constexpr bool has_zero_flag<E> = []() {
-  for (const auto v : values<E>)
-    if (static_cast<std::underlying_type_t<E>>(v) == 0)
-      return true;
-  return false;
-}();
-
-
-template<typename>
-inline constexpr bool is_contiguous = false;
-
-template<Enum E>
-inline constexpr bool is_contiguous<E> = static_cast<std::size_t>(to_underlying(max<E>) - to_underlying(min<E>)) + 1 ==
-  count<E>;
-
-
-template<typename E>
-concept ContiguousEnum = Enum<E> && is_contiguous<E>;
-
-template<typename>
-inline constexpr bool is_contiguous_bitflag = false;
-
-template<BitFlagEnum E>
-inline constexpr bool is_contiguous_bitflag<E> = []() {
-  constexpr auto& enums = entries<E>;
-  using T               = std::underlying_type_t<E>;
-  for (auto i = std::size_t{has_zero_flag<E>}; i < enums.size() - 1; ++i)
-    if (T(enums[i].first) << 1 != T(enums[i + 1].first))
-      return false;
-  return true;
-}();
-
-template<typename E>
-concept ContiguousBitFlagEnum = BitFlagEnum<E> && is_contiguous_bitflag<E>;
 
 
 template<Enum E>
@@ -85,7 +49,7 @@ template<Enum E>
     return true;
   }
   else {
-    for (const auto v : values<E>)
+    for (const auto v : values_generator<E>)
       if (static_cast<T>(v) == value)
         return true;
     return false;
@@ -105,7 +69,7 @@ template<Enum E>
   if (const auto size = name.size(); size < minmax.first || size > minmax.second)
     return false;
 
-  for (const auto& s : names<E>)
+  for (const auto s : names_generator<E>)
     if (s == name)
       return true;
   return false;
@@ -115,7 +79,7 @@ template<Enum E>
 template<Enum E, std::predicate<string_view, string_view> BinaryPredicate>
 [[nodiscard]] constexpr bool contains(const string_view name, const BinaryPredicate binary_predicate) noexcept
 {
-  for (const auto& s : names<E>)
+  for (const auto s : names_generator<E>)
     if (binary_predicate(name, s))
       return true;
   return false;
@@ -128,8 +92,8 @@ namespace details {
     [[nodiscard]] constexpr optional<E> operator()(const std::size_t index) const noexcept
     {
       optional<E> ret;
-      if (index < values<E>.size())
-        ret.emplace(values<E>[index]);
+      if (index < count<E>)
+        ret.emplace(values_generator<E>[index]);
       return ret;
     }
   };
@@ -153,12 +117,12 @@ namespace details {
               return optional<std::size_t>(0); // assumes 0 is the index of value `0`
 
           using U = std::make_unsigned_t<T>;
-          return has_zero + std::countr_zero(static_cast<U>(e)) - std::countr_zero(static_cast<U>(values<E>[has_zero]));
+          return has_zero + std::countr_zero(static_cast<U>(e)) - std::countr_zero(static_cast<U>(values_generator<E>[has_zero]));
         }
       }
       else {
-        for (std::size_t i = 0; i < values<E>.size(); ++i) {
-          if (values<E>[i] == e)
+        for (std::size_t i = 0; i < count<E>; ++i) {
+          if (values_generator<E>[i] == e)
             return i;
         }
       }
@@ -187,8 +151,8 @@ namespace details {
         return a; // nullopt
 
       for (std::size_t i = 0; i < count<E>; ++i) {
-        if (names<E>[i] == name) {
-          a.emplace(values<E>[i]);
+        if (names_generator<E>[i] == name) {
+          a.emplace(values_generator<E>[i]);
           return a;
         }
       }
@@ -200,8 +164,8 @@ namespace details {
     {
       optional<E> a; // rvo not that it really matters
       for (std::size_t i = 0; i < count<E>; ++i) {
-        if (binary_predicate(name,names<E>[i])) {
-          a.emplace(values<E>[i]);
+        if (binary_predicate(name, names_generator<E>[i])) {
+          a.emplace(values_generator<E>[i]);
           return a;
         }
       }
@@ -226,7 +190,7 @@ namespace details {
     [[nodiscard]] constexpr string_view operator()(const E value) const noexcept
     {
       if (const auto i = enchantum::enum_to_index(value))
-        return names<E>[*i];
+        return names_generator<E>[*i];
       return string_view();
     }
   };
