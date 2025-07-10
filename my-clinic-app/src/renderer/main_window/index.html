@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clinic Stopwatch - Analytics</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>📊 Clinic Analytics Dashboard</h1>
+            <button id="back-to-timer-btn" class="back-btn">⏱️ Back to Timer</button>
+        </div>
+
+        <!-- Main content with three-panel layout -->
+        <div class="main-content">
+            <!-- Left Panel: Period Selection and Averages -->
+            <div class="left-panel">
+                <div class="period-selection">
+                    <h3>Time Period</h3>
+                    <div class="period-buttons">
+                        <button class="period-btn active" data-period="day">1 Day</button>
+                        <button class="period-btn" data-period="week">1 Week</button>
+                        <button class="period-btn" data-period="month">1 Month</button>
+                    </div>
+                </div>
+                
+                <div class="averages-section">
+                    <h3>Average Durations</h3>
+                    <div id="averages-list" class="averages-list">
+                        <div class="loading">Loading data...</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel: Chart -->
+            <div class="center-panel">
+                <div class="chart-container">
+                    <h3>Duration Chart</h3>
+                    <canvas id="duration-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Right Panel: Settings -->
+            <div class="right-panel">
+                <div class="settings-section">
+                    <h3>Settings</h3>
+                    <form id="settings-form" class="settings-form">
+                        <div class="form-group">
+                            <label for="reminder-interval">Reminder Interval (minutes):</label>
+                            <input type="number" id="reminder-interval" min="1" max="60" value="5">
+                        </div>
+                        <button type="submit" class="save-btn">Save Settings</button>
+                    </form>
+                </div>
+
+                <div class="stats-summary">
+                    <h3>Summary</h3>
+                    <div id="stats-summary-content" class="summary-content">
+                        <div class="summary-item">
+                            <span class="summary-label">Total Sessions:</span>
+                            <span id="total-sessions" class="summary-value">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Most Active Category:</span>
+                            <span id="most-active" class="summary-value">-</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Average Session:</span>
+                            <span id="average-session" class="summary-value">-</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clinic Stopwatch - Timer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header with category buttons and finish day button -->
+        <div class="header">
+            <div class="category-buttons">
+                <h3>Patient Categories</h3>
+                <div class="button-grid">
+                    <button class="category-btn" data-category="N">N</button>
+                    <button class="category-btn" data-category="1">1</button>
+                    <button class="category-btn" data-category="2">2</button>
+                    <button class="category-btn" data-category="3">3</button>
+                    <button class="category-btn" data-category="4">4</button>
+                    <button class="category-btn" data-category="5">5</button>
+                    <button class="category-btn" data-category="6">6</button>
+                    <button class="category-btn" data-category="R">R</button>
+                </div>
+            </div>
+            <div class="finish-day-container">
+                <button id="finish-day-btn" class="finish-btn">📊 View Analytics</button>
+            </div>
+        </div>
+
+        <!-- Main content area -->
+        <div class="main-content">
+            <!-- Active timers section -->
+            <div class="timers-section">
+                <h3>Active Timers</h3>
+                <div id="active-timers-container" class="timers-container">
+                    <div class="empty-state">Click a category button to start timing</div>
+                </div>
+            </div>
+
+            <!-- Completed timers log -->
+            <div class="completed-section">
+                <h3>Completed Today</h3>
+                <div id="saved-timers-list" class="completed-list">
+                    <div class="empty-state">No completed timers yet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
