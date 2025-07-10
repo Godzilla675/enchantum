@@ -1,0 +1,25 @@
+#container {
+  display: grid;
+  grid-template-columns: 200px 1fr 250px;
+  height: 100vh;
+}
+
+#left-panel,
+#right-panel {
+  padding: 1rem;
+  box-sizing: border-box;
+  background-color: #f3f3f3;
+  overflow-y: auto;
+}
+
+#center-panel {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+button {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  padding: 0.5rem;
+}

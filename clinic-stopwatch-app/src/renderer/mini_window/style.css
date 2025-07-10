@@ -1,0 +1,22 @@
+body {
+  font-family: sans-serif;
+  padding: 0.5rem;
+}
+
+#top-bar {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+#categories button {
+  margin-right: 0.25rem;
+}
+
+.timer-item {
+  margin-bottom: 0.25rem;
+}
+
+.timer-item button {
+  margin-left: 0.5rem;
+}

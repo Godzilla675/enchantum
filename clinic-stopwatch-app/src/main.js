@@ -52,10 +52,10 @@ function createMiniWindow() {
     alwaysOnTop: true,
     frame: true,
     webPreferences: {
-      preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY, // reuse same preload for now
+      preload: MINI_WINDOW_PRELOAD_WEBPACK_ENTRY,
     },
   });
-  miniWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
+  miniWindow.loadURL(MINI_WINDOW_WEBPACK_ENTRY);
   miniWindow.on('closed', () => {
     miniWindow = null;
   });

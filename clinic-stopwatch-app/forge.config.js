@@ -36,12 +36,22 @@ module.exports = {
         renderer: {
           config: './webpack.renderer.config.js',
           entryPoints: [
+            // Main analytics window
             {
-              html: './src/index.html',
-              js: './src/renderer.js',
+              html: './src/renderer/main_window/index.html',
+              js: './src/renderer/main_window/script.js',
               name: 'main_window',
               preload: {
-                js: './src/preload.js',
+                js: './src/preload/main_preload.js',
+              },
+            },
+            // Mini stopwatch window
+            {
+              html: './src/renderer/mini_window/index.html',
+              js: './src/renderer/mini_window/script.js',
+              name: 'mini_window',
+              preload: {
+                js: './src/preload/mini_preload.js',
               },
             },
           ],

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>Clinic Stopwatch – Analytics</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="container">
+    <div id="left-panel">
+      <button id="btn-day">1 Day</button>
+      <button id="btn-week">1 Week</button>
+      <button id="btn-month">1 Month</button>
+      <div id="averages-list"></div>
+    </div>
+    <div id="center-panel">
+      <canvas id="duration-chart"></canvas>
+    </div>
+    <div id="right-panel">
+      <label for="reminder-interval">Reminder Interval (minutes):</label>
+      <input type="number" id="reminder-interval" min="1" />
+      <button id="btn-save-settings">Save Settings</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
