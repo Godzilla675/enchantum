@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clinic Stopwatch - Mini</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="patient-buttons">
+                <button data-category="N">N</button>
+                <button data-category="A">A</button>
+                <button data-category="B">B</button>
+                <button data-category="C">C</button>
+                <button data-category="D">D</button>
+                <button data-category="E">E</button>
+                <button data-category="F">F</button>
+                <button data-category="G">G</button>
+            </div>
+            <button id="finish-day" class="finish-day-btn">Finish Day</button>
+        </div>
+        
+        <div id="active-timers-container" class="active-timers">
+            <!-- Active timers will be dynamically inserted here -->
+        </div>
+        
+        <div id="saved-timers-list" class="saved-timers">
+            <!-- Completed timers will be moved here -->
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>

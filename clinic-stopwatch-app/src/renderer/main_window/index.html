@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Clinic Stopwatch - Analytics</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="left-panel">
+            <h2>Analytics</h2>
+            <div class="period-buttons">
+                <button data-period="day">1 Day</button>
+                <button data-period="week">1 Week</button>
+                <button data-period="month">1 Month</button>
+            </div>
+            <div id="averages-list" class="averages-list">
+                <!-- Average durations will be displayed here -->
+            </div>
+        </div>
+        
+        <div class="center-panel">
+            <h2>Duration Chart</h2>
+            <div class="chart-container">
+                <canvas id="duration-chart"></canvas>
+            </div>
+        </div>
+        
+        <div class="right-panel">
+            <h2>Settings</h2>
+            <div class="settings-form">
+                <label for="reminder-interval">Reminder Interval (minutes):</label>
+                <input type="number" id="reminder-interval" min="1" max="60" value="5">
+                <button id="save-settings" class="save-btn">Save Settings</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
