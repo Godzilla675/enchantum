@@ -1,10 +1,15 @@
 #pragma once
 #include "enchantum.hpp"
+#include "bitflags.hpp"
+
 #ifndef ENCHANTUM_ALIAS_BITSET
   #include <bitset>
 #endif
-#include "bitflags.hpp"
-#include <stdexcept>
+
+// Only include stdexcept if exceptions are enabled
+#ifndef ENCHANTUM_NO_EXCEPTIONS
+  #include <stdexcept>
+#endif
 #include "generators.hpp"
 
 namespace enchantum {

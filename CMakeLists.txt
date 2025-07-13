@@ -24,9 +24,24 @@ target_include_directories(enchantum INTERFACE
 option(ENCHANTUM_BUILD_TESTS "Enable tests for this `enchantum` library" OFF)
 option(ENCHANTUM_ENABLE_MSVC_SPEEDUP "Enable faster but not 100% accurate MSVC enum reflection." ON)
 option(ENCHANTUM_BUILD_BENCHMARKS "Enable compile time benchmarks `enchantum` library" OFF)
+option(ENCHANTUM_USE_PCH "Enable precompiled headers for faster compilation" OFF)
+option(ENCHANTUM_ENABLE_IOSTREAM "Enable iostream operators by default" OFF)
+option(ENCHANTUM_ENABLE_FORMATTING "Enable formatting support by default" OFF)
 
 if(ENCHANTUM_ENABLE_MSVC_SPEEDUP)
     target_compile_definitions(enchantum INTERFACE ENCHANTUM_ENABLE_MSVC_SPEEDUP=1)
+endif()
+
+if(ENCHANTUM_ENABLE_IOSTREAM)
+    target_compile_definitions(enchantum INTERFACE ENCHANTUM_ENABLE_IOSTREAM=1)
+endif()
+
+if(ENCHANTUM_ENABLE_FORMATTING)
+    target_compile_definitions(enchantum INTERFACE ENCHANTUM_ENABLE_FORMATTING=1)
+endif()
+
+if(ENCHANTUM_USE_PCH)
+    target_precompile_headers(enchantum INTERFACE "${INCDIR}/enchantum/pch.hpp")
 endif()
 
 if(ENCHANTUM_BUILD_TESTS)

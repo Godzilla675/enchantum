@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef ENCHANTUM_ENABLE_FORMATTING
+  #define ENCHANTUM_ENABLE_FORMATTING
+#endif
+
 #include <format>
 #include <string_view>
 #include "details/format_util.hpp"

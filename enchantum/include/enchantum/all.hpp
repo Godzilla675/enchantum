@@ -13,12 +13,18 @@
 #include "bitwise_operators.hpp"
 #include "enchantum.hpp"
 #include "entries.hpp"
-#include "iostream.hpp"
 #include "next_value.hpp"
-#include "bitset.hpp"
 
-#if __has_include(<fmt/format.h>)
-  #include "fmt_format.hpp"
-#elif __has_include(<format>)
-  #include "std_format.hpp"
+// Optional iostream support - only include if explicitly requested
+#ifdef ENCHANTUM_ENABLE_IOSTREAM
+  #include "iostream.hpp"
+#endif
+
+// Optional formatting support - only include if explicitly requested
+#ifdef ENCHANTUM_ENABLE_FORMATTING
+  #if __has_include(<fmt/format.h>)
+    #include "fmt_format.hpp"
+  #elif __has_include(<format>)
+    #include "std_format.hpp"
+  #endif
 #endif

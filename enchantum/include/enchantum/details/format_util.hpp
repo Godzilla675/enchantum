@@ -2,10 +2,16 @@
 
 #include "../bitflags.hpp"
 #include "../enchantum.hpp"
-#include <string>
+
+// Only include <string> if formatting is requested
+#ifdef ENCHANTUM_ENABLE_FORMATTING
+  #include <string>
+#endif
 
 namespace enchantum {
 namespace details {
+
+#ifdef ENCHANTUM_ENABLE_FORMATTING
   template<Enum E>
   std::string format(E e) noexcept
   {
@@ -25,5 +31,7 @@ namespace details {
     }
     return std::to_string(+enchantum::to_underlying(e)); // promote using + to select int overload if to underlying returns char
   }
+#endif
+
 } // namespace details
 } // namespace enchantum

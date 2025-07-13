@@ -60,6 +60,43 @@ Compiler Support: (Look at [CI](https://github.com/ZXShady/enchantum/actions))
 
 ## Simple Examples
 
+### Basic Usage (Optimized for fast compilation)
+```cpp
+#include <enchantum/core.hpp> // Lightweight core functionality
+enum class Music { Rock, Jazz , Metal };
+
+int main() 
+{
+  auto music = Music::Rock;
+  std::string_view music_name = enchantum::to_string(music);
+  // music_name == "Rock"
+}
+```
+
+### Full Features (when iostream support is needed)
+```cpp
+#define ENCHANTUM_ENABLE_IOSTREAM
+#include <enchantum/all.hpp>
+enum class Music { Rock, Jazz , Metal };
+
+int main() 
+{
+  auto music = Music::Rock;
+  std::cout << music; // Prints "Rock"
+}
+```
+
+### Legacy/Backward Compatibility
+```cpp
+#include <enchantum/all_features.hpp> // All features enabled
+enum class Music { Rock, Jazz , Metal };
+
+int main() 
+{
+  // All features available
+}
+```
+
 * to string
 ```cpp
 #include <enchantum/enchantum.hpp> // to_string
@@ -149,6 +186,28 @@ int main()
 ```
 
 Look at [Features](docs/features.md) for more information.
+
+## Compile-Time Optimizations
+
+**NEW**: Enchantum now provides multiple entry points for optimized compilation:
+
+- **`enchantum/core.hpp`** - Lightweight core (~0.78s compile time)
+- **`enchantum/all.hpp`** - Full features with conditional compilation  
+- **`enchantum/all_features.hpp`** - Backward compatibility (all features)
+
+```cpp
+// For fastest compilation (core reflection only)
+#include <enchantum/core.hpp>
+
+// For selective features  
+#define ENCHANTUM_ENABLE_IOSTREAM
+#include <enchantum/all.hpp>
+
+// For full compatibility
+#include <enchantum/all_features.hpp>
+```
+
+See [Compile-Time Optimization Guide](docs/compile_time_optimization.md) for details.
 
 
 ## Why Another Enum Reflection Library?

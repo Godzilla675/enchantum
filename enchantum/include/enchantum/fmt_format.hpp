@@ -1,5 +1,9 @@
 #pragma once
 
+#ifndef ENCHANTUM_ENABLE_FORMATTING
+  #define ENCHANTUM_ENABLE_FORMATTING
+#endif
+
 #include "bitflags.hpp"
 #include "details/format_util.hpp"
 #include "enchantum.hpp"
