@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "details/optional.hpp"
 #include "details/string_view.hpp"
+#include "details/mphf.hpp"
 #include "entries.hpp"
 #include "generators.hpp"
 #include <bit>
@@ -24,6 +25,18 @@ namespace details {
     }
     return minmax;
   }
+
+  // Generate MPHF data for each enum type (temporarily disabled while fixing constexpr issues)
+  template<typename E>
+  consteval auto generate_enum_mphf() {
+    // Need to fix constexpr evaluation issues first
+    // Return an invalid MPHF with seed 0 to indicate disabled state
+    constexpr std::size_t enum_size = 1; // Dummy size for disabled MPHF
+    return details::mphf_data<E, enum_size>{0, {}};
+  }
+  
+  template<typename E>
+  inline constexpr auto enum_mphf = generate_enum_mphf<E>();
 
 } // namespace details
 
@@ -69,6 +82,7 @@ template<Enum E>
   if (const auto size = name.size(); size < minmax.first || size > minmax.second)
     return false;
 
+  // Use linear search (MPHF disabled while fixing constexpr issues)
   for (const auto s : names_generator<E>)
     if (s == name)
       return true;
@@ -150,6 +164,7 @@ namespace details {
       if (const auto size = name.size(); size < minmax.first || size > minmax.second)
         return a; // nullopt
 
+      // Use linear search (MPHF disabled while fixing constexpr issues)
       for (std::size_t i = 0; i < count<E>; ++i) {
         if (names_generator<E>[i] == name) {
           a.emplace(values_generator<E>[i]);

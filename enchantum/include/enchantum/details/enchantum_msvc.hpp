@@ -10,14 +10,23 @@
 #include <type_traits>
 #include <utility>
 
-// This macro controls the compile time optimization of msvc
-// This macro may break some enums with very large enum ranges selected.
-// **may** as in I have not found a case where it does
-// but it speeds up compilation massivly.
-// from 20 secs to 14.6 secs
-// from 119 secs to 85
+// This macro controls a compile time optimization for MSVC that may break correctness.
+// According to the technical analysis in the enchantum improvement project,
+// this optimization "may break some enums with very large enum ranges selected"
+// and represents a problematic trade-off of correctness for compilation speed.
+// 
+// The optimization attempts to pre-calculate the additional string length that MSVC
+// uses to represent negative enum values within function signatures, but this is
+// based on heuristics that may not work for all enum configurations.
+//
+// Default: DISABLED for safety. Enable at your own risk only if you have verified
+// that your specific enum configurations work correctly with this optimization.
 #ifndef ENCHANTUM_ENABLE_MSVC_SPEEDUP
-  #define ENCHANTUM_ENABLE_MSVC_SPEEDUP 1
+  #define ENCHANTUM_ENABLE_MSVC_SPEEDUP 0
+#endif
+
+#if ENCHANTUM_ENABLE_MSVC_SPEEDUP
+  #pragma message("WARNING: ENCHANTUM_ENABLE_MSVC_SPEEDUP is enabled. This optimization may break correctness for enums with large ranges. Use with caution.")
 #endif
 namespace enchantum {
 
