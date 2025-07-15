@@ -30,7 +30,9 @@ namespace details {
   template<typename E>
   consteval auto generate_enum_mphf() {
     // Need to fix constexpr evaluation issues first
-    return details::mphf_data<E, 0>{};
+    // Return an invalid MPHF with seed 0 to indicate disabled state
+    constexpr std::size_t enum_size = 1; // Dummy size for disabled MPHF
+    return details::mphf_data<E, enum_size>{0, {}};
   }
   
   template<typename E>
