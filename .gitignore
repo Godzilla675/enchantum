@@ -33,3 +33,11 @@ CMakeFiles/
 .vs/
 benchmarks/time.py
 benchmarks/*.cpp
+
+# Additional CMake build artifacts
+CMakeCache.txt
+DartConfiguration.tcl
+_deps/
+enchantumConfig.cmake
+enchantumConfigVersion.cmake
+tests/tests-*_include.cmake

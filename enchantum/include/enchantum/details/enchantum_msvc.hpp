@@ -177,7 +177,7 @@ namespace details {
   }
 
   template<typename E, bool NullTerminated>
-  constexpr auto reflect() noexcept
+  consteval auto reflect() noexcept
   {
     constexpr auto elements = details::get_elements<E, NullTerminated>();
 
