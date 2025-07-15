@@ -1,0 +1,38 @@
+Filters: [benchmark]
+Randomness seeded to: 2402359236
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+benchmarks is a Catch2 v3.8.1 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Benchmark cast from string
+-------------------------------------------------------------------------------
+/home/runner/work/enchantum/enchantum/benchmarks/cast.cpp:24
+...............................................................................
+
+benchmark name                       samples       iterations    est run time
+                                     mean          low mean      high mean
+                                     std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+cast<MediumEnum>(valid_name)                   100            28      3.192 ms 
+                                        1.14801 us    1.13933 us     1.1641 us 
+                                        58.5235 ns    32.2812 ns    87.4799 ns 
+                                                                               
+cast<MediumEnum>(invalid_name)                 100          1755      3.159 ms 
+                                        18.4227 ns    18.2837 ns     18.727 ns 
+                                       0.990418 ns   0.566986 ns    1.67965 ns 
+                                                                               
+cast<LargeEnum>(valid_name)                    100            12     3.4044 ms 
+                                        2.87064 us    2.85252 us    2.90501 us 
+                                        122.883 ns    68.5852 ns    182.979 ns 
+                                                                               
+cast<LargeEnum>(invalid_name)                  100          1727     3.1086 ms 
+                                        18.3496 ns    18.2563 ns    18.5615 ns 
+                                       0.691556 ns   0.403341 ns    1.09544 ns 
+                                                                               
+
+===============================================================================
+test cases: 1 | 1 passed
+assertions: - none -
+

@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "details/optional.hpp"
 #include "details/string_view.hpp"
+#include "details/mphf.hpp"
 #include "entries.hpp"
 #include "generators.hpp"
 #include <bit>
@@ -150,6 +151,7 @@ namespace details {
       if (const auto size = name.size(); size < minmax.first || size > minmax.second)
         return a; // nullopt
 
+      // Fallback to original O(N) implementation for now while debugging
       for (std::size_t i = 0; i < count<E>; ++i) {
         if (names_generator<E>[i] == name) {
           a.emplace(values_generator<E>[i]);
