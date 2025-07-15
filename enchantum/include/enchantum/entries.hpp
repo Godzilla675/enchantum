@@ -2,12 +2,16 @@
 
 #include "details/string_view.hpp"
 
-#if defined(__clang__)
+#if defined(__NVCOMPILER)
+  #include "details/enchantum_nvcc.hpp"
+#elif defined(__clang__)
   #include "details/enchantum_clang.hpp"
 #elif defined(__GNUC__) || defined(__GNUG__)
   #include "details/enchantum_gcc.hpp"
 #elif defined(_MSC_VER)
   #include "details/enchantum_msvc.hpp"
+#else
+  #error unsupported compiler please open an issue for enchantum
 #endif
 
 #include "common.hpp"
@@ -38,9 +42,19 @@ namespace details {
 
 template<Enum E, typename Pair = std::pair<E, string_view>, bool NullTerminated = true>
 inline constexpr auto entries = []() {
+  
+#if defined(__NVCOMPILER) 
+  // nvc++ had issues with that and did not allow it. it just did not work after testing in godbolt and I don't know why
+  const auto             reflected = details::reflection_data<E, NullTerminated>;
+#else
   const auto             reflected = details::reflection_data<std::remove_cv_t<E>, NullTerminated>;
+#endif
   constexpr auto         size      = sizeof(reflected.values) / sizeof(reflected.values[0]);
-  std::array<Pair, size> ret;
+  static_assert(size != 0,
+    "enchantum failed to reflect this enum.\n"
+    "Please read https://github.com/ZXShady/enchantum/blob/main/docs/limitations.md before opening an issue\n"
+    "with your enum type with all its namespace/classes it is defined inside to help the creator debug the issues.");
+  std::array<Pair, size> ret{};
   auto* const            ret_data = ret.data();
 
 
@@ -57,18 +71,20 @@ inline constexpr auto entries = []() {
 template<Enum E>
 inline constexpr auto values = []() {
   constexpr auto&             enums = entries<E>;
-  std::array<E, enums.size()> ret;
+  std::array<E, enums.size()> ret{};
+  const auto* const           enums_data = enums.data();
   for (std::size_t i = 0; i < ret.size(); ++i)
-    ret[i] = enums[i].first;
+    ret[i] = enums_data[i].first;
   return ret;
 }();
 
 template<Enum E, typename String = string_view, bool NullTerminated = true>
 inline constexpr auto names = []() {
   constexpr auto&                  enums = entries<E, std::pair<E, String>, NullTerminated>;
-  std::array<String, enums.size()> ret;
+  std::array<String, enums.size()> ret{};
+  const auto* const                enums_data = enums.data();
   for (std::size_t i = 0; i < ret.size(); ++i)
-    ret[i] = enums[i].second;
+    ret[i] = enums_data[i].second;
   return ret;
 }();
 
