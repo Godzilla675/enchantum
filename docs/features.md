@@ -52,7 +52,7 @@ Quick Reference
   - [value_ors](#value_ors)
   - [type_name](#type_name)
   - [raw_type_name](#raw_type_name)
-
+  
 **Containers**:
   - [array](#array)
   - [bitset](#bitset)
@@ -61,7 +61,10 @@ Quick Reference
   - [ENCHANTUM_DEFINE_BITWISE_FOR](#enchantum_define_bitwise_for)
   - [ENCHANTUM_ASSERT](#enchantum_assert)
   - [ENCHANTUM_THROW](#enchantum_throw)
-
+  - [ENCHANTUM_ENABLE_MSVC_SPEEDUP](#enchantum_enable_msvc_speedup)
+  - [ENCHANTUM_OPTIONAL](#enchantum_optional)
+  - [ENCHANTUM_STRING](#enchantum_string)
+  - [ENCHANTUM_STRING_VIEW](#enchantum_string_view)
 
 
 # Concepts
@@ -252,6 +255,8 @@ template<typename E, typename Underlying>
 concept EnumOfUnderlying = Enum<E> && std::same_as<std::underlying_type_t<E>, Underlying>;
 ```
 
+constrains an enum to a specific underlying type.
+
 > Example usage:
 ```cpp
 #include <enchantum/common.hpp>
@@ -330,7 +335,7 @@ template<typename T>
 struct enum_traits;
 
 template<Enum E>
-struct enum_traits // default
+struct enum_traits<E> // default
 {
   constexpr static auto prefix_length = 0;
   constexpr static auto min = ENCHANTUM_MIN_RANGE;
@@ -493,11 +498,11 @@ enum class Status { Ok = 0, Error = 1, Unknown = 2 };
 assert(enchantum::cast<Status>(1).has_value());
 assert(!enchantum::cast<Status>(300).has_value());
 
-assert(enchantum::cast<Color>("Unknown").has_value());
+assert(enchantum::cast<Status>("Unknown").has_value());
 
-assert(!enchantum::cast<Color>("UnKnoWn").has_value());
+assert(!enchantum::cast<Status>("UnKnoWn").has_value());
 
-assert(enchantum::cast<Color>("UnKnOwn",[](std::string_view a,std::string_view b){
+assert(enchantum::cast<Status>("UnKnOwn",[](std::string_view a,std::string_view b){
   return std::ranges::equal(a,b,[](unsigned char x,unsigned char y){
     return std::tolower(x) == std::tolower(y);
   })
@@ -666,7 +671,7 @@ constexpr inline std::string_view type_name = /*implementation detail";
 **Description**:  
   Gives an implementation defined null-terminated string representing the type name.
 
-**Notes**: `T` must not be a function, function pointer or a member function pointer otherwise a `static_assert` fires.
+**Notes**: `T` must not be a function, function pointer, member function pointer or a templated type otherwise a `static_assert` fires.
   
 
 **Example**:
@@ -889,7 +894,6 @@ inline constexpr /*implementation details*/ entries_generator;
   Gives a generating iteratable object for enum names.
   This is different than `entries`, since it does not store the entries it creates the them on the fly.
   In general if you don't need actual storage and addressability of the enum entries but merely iterate on them use the `entries_generator` variable instead it yeilds better binary sizes.
-
 
 > Example
 ```cpp
@@ -1162,7 +1166,7 @@ constexpr inline details::ENUM_TO_INDEX_FUNCTOR enum_to_index;
   Converts an enum to its corresponding index value.
 
 - **Parameters**:
-  - `e`: The enum to convert to an index value.
+  - `value`: The enum to convert to an index value.
 
 - **Returns**:  
   The index value corresponding to the provided enum. if the enum is not a value in `values<E>` `std::nullopt` is returned.
@@ -1219,7 +1223,7 @@ The circular variants require `value` to be a valid enum otherwise an assertion 
 They are functors and not templated functions which allows passing  them to higher order functions.
 
 - **Parameters**:
-  - `e`: The enum to convert to an index value.
+  - `value`: The enum to convert to an index value.
 
 - **Returns**:  
 `next_value` and `prev_value` return a std::optional<E> representing the next or previous enum value, or std::nullopt if the value is out of range or invalid.
@@ -1236,15 +1240,15 @@ std::optional<Direction> next = enchantum::next_value(Direction::East);
 std::cout << (next.has_value() ? "Found next value" : "No next value") << std::endl;  
 // Outputs: Found next value
 
-auto nextCircular = enchantum::next_value_circular(Direction::West);  
+Direction nextCircular = enchantum::next_value_circular(Direction::West);  
 std::cout << "Circular next value: " << static_cast<int>(nextCircular) << std::endl;  
 // Outputs: Circular next value: 0 (North)
 
-auto prev = enchantum::prev_value(Direction::South);  
+std::optional<Direction> prev = enchantum::prev_value(Direction::South);  
 std::cout << (prev.has_value() ? "Found previous value" : "No previous value") << std::endl;  
 // Outputs: Found previous value
 
-auto prevCircular = enchantum::prev_value_circular(Direction::North);  
+Direction prevCircular = enchantum::prev_value_circular(Direction::North);  
 std::cout << "Circular previous value: " << static_cast<int>(prevCircular) << std::endl;  
 // Outputs: Circular previous value: 3 (West)
 
@@ -1429,17 +1433,9 @@ private:
   using base = std::array<T,count<E>>;
 public:
   using index_type = E;
-  using typename base::const_iterator;
-  using typename base::const_pointer;
-  using typename base::const_reference;
-  using typename base::const_reverse_iterator;
-  using typename base::difference_type;
-  using typename base::iterator;
-  using typename base::pointer;
   using typename base::reference;
-  using typename base::reverse_iterator;
-  using typename base::size_type;
-  using typename base::value_type;
+  using typename base::const_reference;
+
   using base::at;
   using base::operator[];
 
@@ -1488,7 +1484,7 @@ public:
   using base::base;
   using base::operator=;
 
-  [[nodiscard]] constexpr string to_string(char sep = '|') const;
+  [[nodiscard]] constexpr std::string to_string(char sep = '|') const;
 
   [[nodiscard]] constexpr auto to_string(char zero,char one) const;
 
@@ -1584,4 +1580,82 @@ The `__VA_ARGS__` at the end is more info in the macro for example local variabl
 #ifndef ENCHANTUM_THROW
 #define ENCHANTUM_THROW(exception,...) throw exception
 #endif
+```
+
+
+### ENCHANTUM_ENABLE_MSVC_SPEEDUP
+
+- **Description**: 
+A boolean macro that speeds up msvc compile times but may cause issues with extremely large enums ranges. it is on by default and can be overriden.
+
+```cpp
+// defined in header `entries.hpp`
+#ifndef ENCHANTUM_ENABLE_MSVC_SPEEDUP
+#define ENCHANTUM_ENABLE_MSVC_SPEEDUP 1
+#endif
+```
+
+### ENCHANTUM_OPTIONAL
+
+- **Description**: 
+A macro for customizing the optional type used in the library it is by default `std::optional`
+```cpp
+// in all headers
+#ifndef ENCHANTUM_OPTIONAL
+#include <optional>
+#define ENCHANTUM_OPTIONAL using std::optional;
+#endif
+```
+
+### ENCHANTUM_STRING
+
+- **Description**: 
+A macro for customizing the string type used in the library it is by default `std::string`
+```cpp
+// in all headers
+#ifndef ENCHANTUM_STRING
+#include <string>
+#define ENCHANTUM_STRING using std::string;
+#endif
+```
+
+### ENCHANTUM_STRING_VIEW
+
+- **Description**: 
+A macro for customizing the string view type used in the library it is by default `std::string_view`
+```cpp
+// in all headers
+#ifndef ENCHANTUM_STRING_VIEW
+#include <string_view>
+#define ENCHANTUM_STRING_VIEW using std::string_view;
+#endif
+```
+
+
+### ENCHANTUM_CONFIG_FILE
+
+- **Description**: 
+A macro for customizing a file that will be included in all enchantum files
+
+```cpp
+// in all headers
+#ifdef ENCHANTUM_CONFIG_FILE
+#include ENCHANTUM_CONFIG_FILE
+#endif
+```
+
+> Example:
+
+```cpp
+#define ENCHANTUM_CONFIG_FILE "my_enchantum_config.hpp"
+#include <enchantum/enchantum.hpp>
+```
+
+where `my_enchantum_config.hpp` is 
+
+```cpp
+#include "my_optional.hpp"
+#define  ENCHANTUM_OPTIONAL template<typename T> using optional = my_optional<T>;
+#include "my_string.hpp"
+#define  ENCHANTUM_STRING using string = my_string;
 ```
