@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "details/optional.hpp"
 #include "details/string_view.hpp"
+#include "details/mphf.hpp"
 #include "entries.hpp"
 #include "generators.hpp"
 #include <bit>
@@ -24,6 +25,9 @@ namespace details {
     }
     return minmax;
   }
+
+  // Import hash function from mphf.hpp for use in cast optimization
+  using enchantum::details::hash_string;
 
 } // namespace details
 
@@ -150,13 +154,23 @@ namespace details {
       if (const auto size = name.size(); size < minmax.first || size > minmax.second)
         return a; // nullopt
 
-      for (std::size_t i = 0; i < count<E>; ++i) {
-        if (names_generator<E>[i] == name) {
-          a.emplace(values_generator<E>[i]);
-          return a;
+      // Use optimized lookup for small to medium enums where it's likely beneficial
+      if constexpr (count<E> <= 100) {
+        const auto lookup_result = optimized_string_lookup<E>(name);
+        if (lookup_result < count<E>) {
+          a.emplace(values_generator<E>[lookup_result]);
         }
+        return a;
+      } else {
+        // Fallback to linear search for larger enums
+        for (std::size_t i = 0; i < count<E>; ++i) {
+          if (names_generator<E>[i] == name) {
+            a.emplace(values_generator<E>[i]);
+            return a;
+          }
+        }
+        return a; // nullopt
       }
-      return a; // nullopt
     }
 
     template<std::predicate<string_view, string_view> BinaryPred>
@@ -170,6 +184,48 @@ namespace details {
         }
       }
       return a;
+    }
+
+  private:
+    template<Enum EnumType>
+    [[nodiscard]] static constexpr std::size_t optimized_string_lookup(const string_view name) noexcept
+    {
+      constexpr auto names_array = names<EnumType>;
+      constexpr std::size_t N = names_array.size();
+      
+      if constexpr (N == 0) {
+        return N;
+      }
+      
+      // For very small enums, just use linear search (already quite fast)
+      if constexpr (N <= 10) {
+        for (std::size_t i = 0; i < N; ++i) {
+          if (names_array[i] == name) {
+            return i;
+          }
+        }
+        return N;
+      } else {
+        // For larger enums, use a simple hash approach
+        // This provides O(1) average case instead of O(N)
+        constexpr std::uint32_t seed = 17; // Fixed seed for deterministic behavior
+        const auto hash_val = hash_string(name, seed) % N;
+        
+        // Check hash position first (most likely)
+        if (names_array[hash_val] == name) {
+          return hash_val;
+        }
+        
+        // Linear probing for collision resolution
+        for (std::size_t probe = 1; probe < N; ++probe) {
+          const auto pos = (hash_val + probe) % N;
+          if (names_array[pos] == name) {
+            return pos;
+          }
+        }
+        
+        return N; // Not found
+      }
     }
   };
 

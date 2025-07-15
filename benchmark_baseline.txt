@@ -1,0 +1,67 @@
+Randomness seeded to: 2372655772
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+benchmarks is a Catch2 v3.8.1 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Cast Benchmark - Small Enum (10 values)
+-------------------------------------------------------------------------------
+/home/runner/work/enchantum/enchantum/benchmarks/cast.cpp:31
+...............................................................................
+
+benchmark name                       samples       iterations    est run time
+                                     mean          low mean      high mean
+                                     std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+cast SmallEnum                                 100           131     3.2095 ms 
+                                        246.026 ns    244.229 ns    248.954 ns 
+                                         11.474 ns    7.41829 ns    16.3988 ns 
+                                                                               
+cast SmallEnum - worst case                    100            77     3.2186 ms 
+                                        421.839 ns     419.25 ns    426.598 ns 
+                                        17.4171 ns    10.8837 ns    26.5133 ns 
+                                                                               
+
+-------------------------------------------------------------------------------
+Cast Benchmark - Medium Enum (50 values)
+-------------------------------------------------------------------------------
+/home/runner/work/enchantum/enchantum/benchmarks/cast.cpp:44
+...............................................................................
+
+benchmark name                       samples       iterations    est run time
+                                     mean          low mean      high mean
+                                     std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+cast MediumEnum                                100            32     3.2128 ms 
+                                        1.02571 us    1.01912 us    1.03729 us 
+                                         43.659 ns    28.5788 ns    66.1957 ns 
+                                                                               
+cast MediumEnum - worst case                   100            18     3.3372 ms 
+                                        1.87876 us    1.86759 us    1.90093 us 
+                                        76.9991 ns    46.9884 ns    119.642 ns 
+                                                                               
+
+-------------------------------------------------------------------------------
+Cast Benchmark - Large Enum (100 values)
+-------------------------------------------------------------------------------
+/home/runner/work/enchantum/enchantum/benchmarks/cast.cpp:57
+...............................................................................
+
+benchmark name                       samples       iterations    est run time
+                                     mean          low mean      high mean
+                                     std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+cast LargeEnum                                 100            17     3.2895 ms 
+                                        1.95908 us    1.94863 us    1.98056 us 
+                                        73.9149 ns    43.8256 ns     116.12 ns 
+                                                                               
+cast LargeEnum - worst case                    100             9     3.3165 ms 
+                                        3.72569 us     3.6969 us    3.78942 us 
+                                        207.925 ns     115.68 ns    377.215 ns 
+                                                                               
+
+===============================================================================
+test cases: 3 | 3 passed
+assertions: - none -
+
