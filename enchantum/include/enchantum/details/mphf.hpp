@@ -38,7 +38,7 @@ struct hash_table_data {
 
 // Simple hash table generator 
 template <std::size_t N>
-[[nodiscard]] consteval auto make_hash_table(const std::array<std::string_view, N>& keys) noexcept -> hash_table_data<N> {
+[[nodiscard]] constexpr auto make_hash_table(const std::array<std::string_view, N>& keys) noexcept -> hash_table_data<N> {
     if constexpr (N == 0) {
         return {};
     }
