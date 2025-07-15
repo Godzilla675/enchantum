@@ -22,11 +22,14 @@ target_include_directories(enchantum INTERFACE
 )
 
 option(ENCHANTUM_BUILD_TESTS "Enable tests for this `enchantum` library" OFF)
-option(ENCHANTUM_ENABLE_MSVC_SPEEDUP "Enable faster but not 100% accurate MSVC enum reflection." ON)
+option(ENCHANTUM_ENABLE_MSVC_SPEEDUP "Enable faster but potentially incorrect MSVC enum reflection optimization. WARNING: May break correctness for enums with large ranges." OFF)
 option(ENCHANTUM_BUILD_BENCHMARKS "Enable compile time benchmarks `enchantum` library" OFF)
 
 if(ENCHANTUM_ENABLE_MSVC_SPEEDUP)
+    message(WARNING "ENCHANTUM_ENABLE_MSVC_SPEEDUP is enabled. This optimization may break correctness for enums with large ranges. Use with caution.")
     target_compile_definitions(enchantum INTERFACE ENCHANTUM_ENABLE_MSVC_SPEEDUP=1)
+else()
+    target_compile_definitions(enchantum INTERFACE ENCHANTUM_ENABLE_MSVC_SPEEDUP=0)
 endif()
 
 if(ENCHANTUM_BUILD_TESTS)
