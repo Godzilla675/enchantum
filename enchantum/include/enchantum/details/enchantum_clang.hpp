@@ -109,7 +109,7 @@ namespace details {
   inline constexpr auto static_storage_for = Copy;
 #endif
   template<typename E, bool NullTerminated>
-  constexpr auto reflect() noexcept
+  consteval auto reflect() noexcept
   {
     constexpr auto Min  = enum_traits<E>::min;
     constexpr auto Max  = enum_traits<E>::max;
