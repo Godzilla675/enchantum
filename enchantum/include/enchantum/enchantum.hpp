@@ -26,6 +26,25 @@ namespace details {
     return minmax;
   }
 
+  // Helper struct to cache hash table data for each enum type
+  template<Enum E>
+  struct enum_hash_data {
+    static constexpr std::size_t enum_count = count<E>;
+    
+    // Convert the names array to the format expected by hash table generator
+    static constexpr auto names_array = []() {
+      std::array<std::string_view, enum_count> result{};
+      constexpr auto& source_names = names<E>;
+      for (std::size_t i = 0; i < enum_count; ++i) {
+        result[i] = std::string_view{source_names[i]};
+      }
+      return result;
+    }();
+    
+    // Generate the hash table data at compile time
+    static constexpr auto hash_table = mphf::make_hash_table<enum_count>(names_array);
+  };
+
 } // namespace details
 
 
@@ -151,12 +170,15 @@ namespace details {
       if (const auto size = name.size(); size < minmax.first || size > minmax.second)
         return a; // nullopt
 
-      // Fallback to original O(N) implementation for now while debugging
-      for (std::size_t i = 0; i < count<E>; ++i) {
-        if (names_generator<E>[i] == name) {
-          a.emplace(values_generator<E>[i]);
-          return a;
-        }
+      // OPTIMIZED O(1) PATH using hash table
+      constexpr auto& hash_table = details::enum_hash_data<E>::hash_table;
+      constexpr auto& names_array = details::enum_hash_data<E>::names_array;
+      
+      const std::int32_t index = details::mphf::hash_lookup(name, hash_table, names_array);
+
+      if (index >= 0) {
+        a.emplace(values_generator<E>[static_cast<std::size_t>(index)]);
+        return a;
       }
       return a; // nullopt
     }
