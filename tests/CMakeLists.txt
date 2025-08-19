@@ -60,6 +60,9 @@ if(STD LESS 20)
 endif()
 target_sources(tests PRIVATE ${SRCS})
 
+# Apply optimization settings
+enchantum_optimize_target(tests)
+
 include(CTest)
 include(Catch)
 catch_discover_tests(tests)

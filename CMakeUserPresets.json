@@ -1,0 +1,41 @@
+{
+  "version": 6,
+  "configurePresets": [
+    {
+      "name": "baseline",
+      "generator": "Ninja",
+      "binaryDir": "build/baseline",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENCH_USE_UNITY": "OFF",
+        "ENCH_USE_PCH": "OFF",
+        "ENCH_USE_LTO": "OFF",
+        "ENCH_USE_CCACHE": "ON",
+        "ENCH_FAST_MATH": "OFF",
+        "ENCH_NATIVE_ARCH": "OFF",
+        "ENCHANTUM_BUILD_TESTS": "ON",
+        "ENCHANTUM_BUILD_BENCHMARKS": "ON"
+      }
+    },
+    {
+      "name": "optimized",
+      "generator": "Ninja",
+      "binaryDir": "build/optimized",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "ENCH_USE_UNITY": "ON",
+        "ENCH_USE_PCH": "ON",
+        "ENCH_USE_LTO": "ON",
+        "ENCH_USE_CCACHE": "ON",
+        "ENCH_FAST_MATH": "OFF",
+        "ENCH_NATIVE_ARCH": "ON",
+        "ENCHANTUM_BUILD_TESTS": "ON",
+        "ENCHANTUM_BUILD_BENCHMARKS": "ON"
+      }
+    }
+  ],
+  "buildPresets": [
+    { "name": "baseline", "configurePreset": "baseline", "jobs": 0 },
+    { "name": "optimized", "configurePreset": "optimized", "jobs": 0 }
+  ]
+}

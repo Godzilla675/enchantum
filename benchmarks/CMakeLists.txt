@@ -5,7 +5,14 @@ FetchContent_Declare(magic_enum
 	GIT_REPOSITORY https://github.com/Neargye/magic_enum.git
 	GIT_SHALLOW ON
 	GIT_TAG master)
-FetchContent_MakeAvailable(magic_enum)
+
+FetchContent_Declare( 
+  Catch2
+  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+  GIT_TAG devel
+)
+
+FetchContent_MakeAvailable(magic_enum Catch2)
 
 add_executable(benchmarks)
 target_include_directories(benchmarks PRIVATE "${magic_enum_SOURCE_DIR}/include")
@@ -26,3 +33,6 @@ file(GLOB_RECURSE SRCS "*.cpp" "*.hpp")
 target_sources(benchmarks PRIVATE
   ${SRCS}
 )
+
+# Apply optimization settings
+enchantum_optimize_target(benchmarks)
