@@ -13,7 +13,7 @@
         "ENCH_USE_CCACHE": "ON",
         "ENCH_FAST_MATH": "OFF",
         "ENCH_NATIVE_ARCH": "OFF",
-        "ENCHANTUM_BUILD_TESTS": "ON",
+        "ENCHANTUM_BUILD_TESTS": "OFF",
         "ENCHANTUM_BUILD_BENCHMARKS": "ON"
       }
     },
@@ -29,7 +29,7 @@
         "ENCH_USE_CCACHE": "ON",
         "ENCH_FAST_MATH": "OFF",
         "ENCH_NATIVE_ARCH": "ON",
-        "ENCHANTUM_BUILD_TESTS": "ON",
+        "ENCHANTUM_BUILD_TESTS": "OFF",
         "ENCHANTUM_BUILD_BENCHMARKS": "ON"
       }
     }

@@ -1,0 +1,33 @@
+Randomness seeded to: 1922067605
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+benchmarks is a Catch2 v3.9.1 host application.
+Run with -? for options
+
+-------------------------------------------------------------------------------
+Basic enum reflection benchmark
+-------------------------------------------------------------------------------
+/home/runner/work/enchantum/enchantum/benchmarks/basic_benchmark.cpp:9
+...............................................................................
+
+benchmark name                       samples       iterations    est run time
+                                     mean          low mean      high mean
+                                     std dev       low std dev   high std dev
+-------------------------------------------------------------------------------
+to_string                                      100         81638          0 ns 
+                                       0.364649 ns   0.357018 ns   0.374807 ns 
+                                      0.0446822 ns  0.0366653 ns  0.0628594 ns 
+                                                                               
+cast                                           100         62078          0 ns 
+                                       0.480155 ns   0.474738 ns   0.487498 ns 
+                                      0.0318718 ns  0.0259725 ns  0.0436701 ns 
+                                                                               
+values                                         100         46337          0 ns 
+                                       0.622779 ns   0.618737 ns   0.632678 ns 
+                                      0.0318663 ns  0.0155704 ns  0.0522094 ns 
+                                                                               
+
+===============================================================================
+test cases: 1 | 1 passed
+assertions: - none -
+

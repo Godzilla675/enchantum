@@ -8,8 +8,9 @@ def parse_time_file(path):
         for line in f:
             if 'Elapsed (wall clock) time' in line:
                 # Format like: 0:12.34 or 1:02:03
-                val = line.split(':',1)[1].strip()
-                parts = val.split(':')
+                # Extract time part after the last colon in the line
+                time_part = line.split('): ')[-1].strip()
+                parts = time_part.split(':')
                 try:
                     if len(parts) == 3:
                         wall = int(parts[0])*3600 + int(parts[1])*60 + float(parts[2])
@@ -19,7 +20,9 @@ def parse_time_file(path):
                         wall = float(parts[0])
                 except: pass
             if 'Maximum resident set size' in line:
-                try: rss = float(line.split(':',1)[1].strip())
+                try: 
+                    # Extract number from line like "Maximum resident set size (kbytes): 201948"
+                    rss = float(line.split(':')[-1].strip())
                 except: pass
     return wall, rss
 
@@ -41,8 +44,10 @@ def gather_sizes(build_dir):
     return sizes
 
 def summarize_bench_jsons(bench_dir):
-    # Google Benchmark JSON aggregator: compute median of real_time per name
+    # Parse both Google Benchmark JSON and Catch2 text format
     results = {}
+    
+    # Try Google Benchmark JSON first
     for p in glob.glob(os.path.join(bench_dir, '*.json')):
         try:
             data = json.load(open(p))
@@ -52,6 +57,36 @@ def summarize_bench_jsons(bench_dir):
                     results.setdefault(name, []).append(t)
         except Exception:
             pass
+    
+    # Try Catch2 text format
+    for p in glob.glob(os.path.join(bench_dir, '*.txt')):
+        try:
+            with open(p, 'r') as f:
+                lines = f.readlines()
+                for i, line in enumerate(lines):
+                    stripped = line.strip()
+                    # Look for benchmark name lines that end with "ns" and start with a letter
+                    if (stripped.endswith(' ns') and 
+                        stripped and stripped[0].isalpha() and
+                        not stripped.startswith(('-', '~', '='))):
+                        
+                        # Extract benchmark name (first word)
+                        name = stripped.split()[0]
+                        
+                        # Check next line for mean time
+                        if i + 1 < len(lines):
+                            next_line = lines[i + 1].strip()
+                            if next_line and next_line[0].isdigit():
+                                parts = next_line.split()
+                                if parts and len(parts) > 0:
+                                    try:
+                                        time_val = float(parts[0].replace('ns', ''))
+                                        results.setdefault(name, []).append(time_val)
+                                    except ValueError:
+                                        pass
+        except Exception:
+            pass
+    
     summary = {k: statistics.median(v) for k,v in results.items()}
     return summary
 
@@ -59,11 +94,11 @@ def load_env():
     return {
         'os': os.uname().sysname if hasattr(os, 'uname') else 'unknown',
         'python': sys.version.split()[0],
-        'datetime': datetime.datetime.utcnow().isoformat()+'Z'
+        'datetime': datetime.datetime.now().isoformat()
     }
 
 def main():
-    report_date = datetime.datetime.utcnow().strftime('%Y%m%d')
+    report_date = datetime.datetime.now().strftime('%Y%m%d')
     raw_root = os.path.join('docs','perf','raw',report_date)
     out_md = os.path.join('docs','perf', f'opt-report-{report_date}.md')
     os.makedirs(os.path.dirname(out_md), exist_ok=True)
@@ -114,7 +149,7 @@ def main():
         lines.append("## Runtime Benchmarks")
         lines.append("_No comparable benchmark data found._")
     with open(out_md,'w') as f:
-        f.write("\\n".join(lines))
+        f.write("\n".join(lines))
     print(f"Wrote report to {out_md}")
 
 if __name__ == '__main__':

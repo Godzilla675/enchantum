@@ -1,0 +1,13 @@
+ninja: Entering directory `build/baseline'
+[1/2] Building CXX object benchmarks/CMakeFiles/benchmarks.dir/basic_benchmark.cpp.o
+[2/2] Linking CXX executable benchmarks/benchmarks
+metric             	count 	avg (us) 	total (ms)
+.ninja parse       	1     	848.0   	0.8
+.ninja_log load    	1     	135.0   	0.1
+.ninja_deps load   	1     	320.0   	0.3
+node stat          	847   	2.2     	1.8
+ComputeCriticalPath	1     	51.0    	0.1
+StartEdge          	4     	123.5   	0.5
+FinishCommand      	2     	186.0   	0.4
+
+path->node hash load 0.44 (899 entries / 2048 buckets)

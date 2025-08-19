@@ -1,0 +1,24 @@
+Preset CMake variables:
+
+  CMAKE_BUILD_TYPE="Release"
+  ENCHANTUM_BUILD_BENCHMARKS="ON"
+  ENCHANTUM_BUILD_TESTS="OFF"
+  ENCH_FAST_MATH="OFF"
+  ENCH_NATIVE_ARCH="OFF"
+  ENCH_USE_CCACHE="ON"
+  ENCH_USE_LTO="OFF"
+  ENCH_USE_PCH="OFF"
+  ENCH_USE_UNITY="OFF"
+
+-- Configuring done (0.8s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/runner/work/enchantum/enchantum/build/baseline
+ninja: Entering directory `build/baseline'
+ninja: no work to do.
+metric          	count 	avg (us) 	total (ms)
+.ninja parse    	1     	825.0   	0.8
+.ninja_log load 	1     	169.0   	0.2
+.ninja_deps load	1     	340.0   	0.3
+node stat       	839   	2.2     	1.9
+
+path->node hash load 0.44 (899 entries / 2048 buckets)
