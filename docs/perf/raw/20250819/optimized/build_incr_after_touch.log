@@ -1,0 +1,13 @@
+ninja: Entering directory `build/optimized'
+[1/2] Building CXX object benchmarks/CMakeFiles/benchmarks.dir/Unity/unity_0_cxx.cxx.o
+[2/2] Linking CXX executable benchmarks/benchmarks
+metric             	count 	avg (us) 	total (ms)
+.ninja parse       	1     	396.0   	0.4
+.ninja_log load    	1     	134.0   	0.1
+.ninja_deps load   	1     	284.0   	0.3
+node stat          	787   	2.1     	1.7
+ComputeCriticalPath	1     	18.0    	0.0
+StartEdge          	4     	106.8   	0.4
+FinishCommand      	2     	140.0   	0.3
+
+path->node hash load 0.41 (839 entries / 2048 buckets)

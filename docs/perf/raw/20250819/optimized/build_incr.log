@@ -1,0 +1,25 @@
+Preset CMake variables:
+
+  CMAKE_BUILD_TYPE="Release"
+  ENCHANTUM_BUILD_BENCHMARKS="ON"
+  ENCHANTUM_BUILD_TESTS="OFF"
+  ENCH_FAST_MATH="OFF"
+  ENCH_NATIVE_ARCH="ON"
+  ENCH_USE_CCACHE="ON"
+  ENCH_USE_LTO="ON"
+  ENCH_USE_PCH="ON"
+  ENCH_USE_UNITY="ON"
+
+-- IPO/LTO is supported and enabled
+-- Configuring done (0.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/runner/work/enchantum/enchantum/build/optimized
+ninja: Entering directory `build/optimized'
+ninja: no work to do.
+metric          	count 	avg (us) 	total (ms)
+.ninja parse    	1     	402.0   	0.4
+.ninja_log load 	1     	131.0   	0.1
+.ninja_deps load	1     	282.0   	0.3
+node stat       	779   	2.2     	1.7
+
+path->node hash load 0.41 (839 entries / 2048 buckets)

@@ -5,6 +5,8 @@ HOMEPAGE_URL "https://github.com/ZXShady/enchantum"
 DESCRIPTION  "Fast macro-free enum reflection C++ library"
 LANGUAGES CXX)
 
+include(cmake/Optimize.cmake)
+
 if(POLICY CMP0128)
     cmake_policy(SET CMP0128 NEW)
 endif()

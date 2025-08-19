@@ -1,0 +1,55 @@
+Preset CMake variables:
+
+  CMAKE_BUILD_TYPE="Release"
+  ENCHANTUM_BUILD_BENCHMARKS="ON"
+  ENCHANTUM_BUILD_TESTS="OFF"
+  ENCH_FAST_MATH="OFF"
+  ENCH_NATIVE_ARCH="ON"
+  ENCH_USE_CCACHE="ON"
+  ENCH_USE_LTO="ON"
+  ENCH_USE_PCH="ON"
+  ENCH_USE_UNITY="ON"
+
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- IPO/LTO is supported and enabled
+-- Performing Test HAVE_FLAG__ffile_prefix_map__home_runner_work_enchantum_enchantum_build_optimized__deps_catch2_src__
+-- Performing Test HAVE_FLAG__ffile_prefix_map__home_runner_work_enchantum_enchantum_build_optimized__deps_catch2_src__ - Success
+-- Configuring done (4.9s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/runner/work/enchantum/enchantum/build/optimized
+ninja: Entering directory `build/optimized'
+[1/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_13_cxx.cxx.o
+[2/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_8_cxx.cxx.o
+[3/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_7_cxx.cxx.o
+[4/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_11_cxx.cxx.o
+[5/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_10_cxx.cxx.o
+[6/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_9_cxx.cxx.o
+[7/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_3_cxx.cxx.o
+[8/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_5_cxx.cxx.o
+[9/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_12_cxx.cxx.o
+[10/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_2_cxx.cxx.o
+[11/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_0_cxx.cxx.o
+[12/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_6_cxx.cxx.o
+[13/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_4_cxx.cxx.o
+[14/20] Building CXX object benchmarks/CMakeFiles/benchmarks.dir/cmake_pch.hxx.gch
+[15/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2WithMain.dir/Unity/unity_0_cxx.cxx.o
+[16/20] Building CXX object _deps/catch2-build/src/CMakeFiles/Catch2.dir/Unity/unity_1_cxx.cxx.o
+[17/20] Linking CXX static library _deps/catch2-build/src/libCatch2.a
+[18/20] Linking CXX static library _deps/catch2-build/src/libCatch2Main.a
+[19/20] Building CXX object benchmarks/CMakeFiles/benchmarks.dir/Unity/unity_0_cxx.cxx.o
+[20/20] Linking CXX executable benchmarks/benchmarks
+metric             	count 	avg (us) 	total (ms)
+.ninja parse       	1     	478.0   	0.5
+.ninja_log load    	1     	3.0     	0.0
+.ninja_deps load   	1     	5.0     	0.0
+node stat          	243   	2.6     	0.6
+ComputeCriticalPath	1     	5.0     	0.0
+StartEdge          	24    	996.8   	23.9
+FinishCommand      	20    	315.3   	6.3
+
+path->node hash load 0.44 (899 entries / 2048 buckets)

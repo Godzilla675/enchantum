@@ -32,4 +32,4 @@ buildGCC/
 CMakeFiles/
 .vs/
 benchmarks/time.py
-benchmarks/*.cpp
+benchmarks/*.cpp__pycache__/
