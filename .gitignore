@@ -40,3 +40,7 @@ bench_auto
 benchmark_test
 test_len_first
 test_api_compatibility
+
+# Benchmark results (exclude from commits)
+benchmarks/results/
+!benchmarks/results/.gitkeep
