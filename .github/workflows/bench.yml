@@ -1,0 +1,103 @@
+name: Benchmark
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'enchantum/include/**'
+      - 'benchmarks/**'
+      - 'scripts/run_benchmarks.py'
+      - '.github/workflows/bench.yml'
+  # Uncomment for automated runs on main
+  # push:
+  #   branches: [main]
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  benchmark:
+    name: ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.os }}
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { name: "Linux GCC 13", os: ubuntu-latest, compiler: gcc, version: 13, cxx: g++-13 }
+          - { name: "Linux Clang 18", os: ubuntu-latest, compiler: clang, version: 18, cxx: clang++-18 }
+          - { name: "Windows MSVC 2022", os: windows-latest, compiler: msvc, cxx: cl }
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Install CMake and Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Setup MSVC Dev Command Prompt
+        if: runner.os == 'Windows' && matrix.platform.compiler == 'msvc'
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Setup GCC
+        if: matrix.platform.compiler == 'gcc'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc-${{ matrix.platform.version }} g++-${{ matrix.platform.version }}
+
+      - name: Setup Clang
+        if: matrix.platform.compiler == 'clang'
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh ${{ matrix.platform.version }}
+          sudo apt-get install -y clang-${{ matrix.platform.version }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.x'
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cmake -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DCMAKE_CXX_COMPILER=${{ matrix.platform.cxx }} \
+            -DENCHANTUM_BUILD_BENCHMARKS=ON
+
+      - name: Build Benchmarks
+        run: cmake --build build --target enchantum_bench_auto enchantum_bench_naive enchantum_bench_len_first
+
+      - name: Run Benchmarks
+        run: |
+          # Set environment variables for reproducible runs
+          export ENCHANTUM_BENCH_RUNS=50
+          export ENCHANTUM_BENCH_WARMUP=10
+          
+          python3 scripts/run_benchmarks.py --build-dir build/benchmarks --output-dir benchmarks/results
+
+      - name: Upload Raw CSV Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: raw-csv-${{ matrix.platform.compiler }}-${{ matrix.platform.version || 'latest' }}
+          path: benchmarks/results/raw_csv/
+          retention-days: 30
+
+      - name: Upload Combined Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: combined-results-${{ matrix.platform.compiler }}-${{ matrix.platform.version || 'latest' }}
+          path: |
+            benchmarks/results/combined_*.csv
+            benchmarks/results/summary_*.md
+          retention-days: 30
+
+      - name: Display Summary
+        run: |
+          echo "## Benchmark Results Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ -f benchmarks/results/summary_*.md ]; then
+            cat benchmarks/results/summary_*.md >> $GITHUB_STEP_SUMMARY
+          fi

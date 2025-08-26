@@ -11,8 +11,11 @@
 // Test each policy separately by recompiling
 
 // Test with AUTO policy
+#ifndef ENCHANTUM_ENUM_DISPATCH_POLICY
 #define ENCHANTUM_ENUM_DISPATCH_POLICY ENCHANTUM_ENUM_POLICY_AUTO
+#endif
 #include "../enchantum/include/enchantum/enchantum.hpp"
+#include "compiler_id.hpp"
 
 // Define synthetic enums with various sizes and patterns
 enum class Tiny3 { A, B, C };
@@ -242,6 +245,7 @@ void run_benchmarks() {
 }
 
 int main() {
+    benchmark_utils::print_compiler_id();
     std::cout << "Enhanced Enchantum Cast Benchmark\n";
     std::cout << "=================================\n\n";
     
