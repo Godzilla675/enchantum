@@ -14,14 +14,36 @@
   #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 
+// Define nodiscard macro if not available
+#if __cplusplus < 201703L
+  #if defined(__has_cpp_attribute)
+    #if __has_cpp_attribute(nodiscard)
+      #define ENCHANTUM_NODISCARD [[nodiscard]]
+    #else
+      #define ENCHANTUM_NODISCARD
+    #endif
+  #else
+    #define ENCHANTUM_NODISCARD
+  #endif
+#else
+  #define ENCHANTUM_NODISCARD [[nodiscard]]
+#endif
+
+
 namespace enchantum {
 namespace scoped {
   namespace details {
 
+    // Helper for C++14 generic lambda simulation
+    struct StartsWith {
+      constexpr bool operator()(string_view a, string_view b) const {
+          return a.substr(0, b.size()) == b;
+      }
+    };
 
     constexpr string_view remove_scope_or_empty(string_view string, const string_view type_name) noexcept
     {
-      const auto starts_with = [](auto a, auto b) { return a.substr(0, b.size()) == b; };
+      const StartsWith starts_with{};
       if (!starts_with(string, type_name))
         return string_view();
       string.remove_prefix(type_name.size());
@@ -33,14 +55,14 @@ namespace scoped {
   } // namespace details
 
   template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-  [[nodiscard]] constexpr bool contains(const string_view name) noexcept
+  ENCHANTUM_NODISCARD constexpr bool contains(const string_view name) noexcept
   {
     const auto n = details::remove_scope_or_empty(name, type_name<E>);
     return !n.empty() && enchantum::contains<E>(n);
   }
 
   template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E), typename BinaryPredicate>
-  [[nodiscard]] constexpr bool contains(const string_view name, const BinaryPredicate binary_predicate) noexcept
+  ENCHANTUM_NODISCARD constexpr bool contains(const string_view name, const BinaryPredicate binary_predicate) noexcept
   {
     const auto n = details::remove_scope_or_empty(name, type_name<E>);
     return !n.empty() && enchantum::contains<E>(n, binary_predicate);
@@ -49,14 +71,14 @@ namespace scoped {
   namespace details {
     template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
     struct scoped_cast_functor {
-      [[nodiscard]] constexpr optional<E> operator()(const string_view name) const noexcept
+      ENCHANTUM_NODISCARD constexpr optional<E> operator()(const string_view name) const noexcept
       {
         const auto n = details::remove_scope_or_empty(name, type_name<E>);
         return n.empty() ? optional<E>() : cast<E>(n);
       }
 
       template<typename BinaryPred>
-      [[nodiscard]] constexpr optional<E> operator()(const string_view name, const BinaryPred binary_predicate) const noexcept
+      ENCHANTUM_NODISCARD constexpr optional<E> operator()(const string_view name, const BinaryPred binary_predicate) const noexcept
       {
         const auto n = details::remove_scope_or_empty(name, type_name<E>);
         return n.empty() ? optional<E>() : cast<E>(n, binary_predicate);
@@ -66,10 +88,11 @@ namespace scoped {
     struct to_scoped_string_functor {
       // hacky workaround about string not being a literal type.
       template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E), typename String = string>
-      [[nodiscard]] constexpr String operator()(const E value) const noexcept
+      ENCHANTUM_NODISCARD constexpr String operator()(const E value) const noexcept
       {
         String s;
-        if (const auto i = enchantum::enum_to_index(value)) {
+        const auto i = enchantum::enum_to_index(value);
+        if (i) {
           s += type_name<E>;
           s += "::";
           s += names_generator<E>[*i];
@@ -81,16 +104,16 @@ namespace scoped {
   } // namespace details
 
 
-  inline constexpr details::to_scoped_string_functor to_string;
+  static constexpr details::to_scoped_string_functor to_string{};
 
   template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-  inline constexpr details::scoped_cast_functor<E> cast;
+  static constexpr details::scoped_cast_functor<E> cast{};
 
   template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-  [[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+  ENCHANTUM_NODISCARD constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
   {
     std::size_t pos = 0;
-    for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
+    for (std::size_t i = s.find(sep); i != string_view::npos; i = s.find(sep, pos)) {
       if (!enchantum::scoped::contains<E>(s.substr(pos, i - pos), binary_pred))
         return false;
       pos = i + 1;
@@ -99,10 +122,10 @@ namespace scoped {
   }
 
   template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-  [[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep = '|') noexcept
+  ENCHANTUM_NODISCARD constexpr bool contains_bitflag(const string_view s, const char sep = '|') noexcept
   {
     std::size_t pos = 0;
-    for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
+    for (std::size_t i = s.find(sep); i != string_view::npos; i = s.find(sep, pos)) {
       if (!enchantum::scoped::contains<E>(s.substr(pos, i - pos)))
         return false;
       pos = i + 1;
@@ -112,12 +135,15 @@ namespace scoped {
 
 
   template<typename String = string, ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-  [[nodiscard]] constexpr String to_string_bitflag(const E value, const char sep = '|')
+  ENCHANTUM_NODISCARD constexpr String to_string_bitflag(const E value, const char sep = '|')
   {
     using T = std::underlying_type_t<E>;
-    if constexpr (has_zero_flag<E>)
+
+    // Regular if (has_zero_flag<E>) is fine for logic flow if types are compatible.
+    if (has_zero_flag<E>) {
       if (static_cast<T>(value) == 0)
         return enchantum::scoped::to_string(value);
+    }
 
     String         name;
     T              check_value = 0;
@@ -141,27 +167,30 @@ namespace scoped {
 
 
   template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-  [[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+  ENCHANTUM_NODISCARD constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
   {
     using T = std::underlying_type_t<E>;
     T           check_value{};
     std::size_t pos = 0;
-    for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
-      if (const auto v = enchantum::scoped::cast<E>(s.substr(pos, i - pos), binary_pred))
+    for (std::size_t i = s.find(sep); i != string_view::npos; i = s.find(sep, pos)) {
+      const auto v = enchantum::scoped::cast<E>(s.substr(pos, i - pos), binary_pred);
+      if (v)
         check_value |= static_cast<T>(*v);
       else
         return optional<E>();
       pos = i + 1;
     }
 
-    if (const auto v = enchantum::scoped::cast<E>(s.substr(pos), binary_pred))
+    const auto v = enchantum::scoped::cast<E>(s.substr(pos), binary_pred);
+    if (v)
       return optional<E>(static_cast<E>(check_value | static_cast<T>(*v)));
     return optional<E>();
   }
 
   template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-  [[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep = '|') noexcept
+  ENCHANTUM_NODISCARD constexpr optional<E> cast_bitflag(const string_view s, const char sep = '|') noexcept
   {
+    // C++14 generic lambda
     return enchantum::scoped::cast_bitflag<E>(s, sep, [](const auto& a, const auto& b) { return a == b; });
   }
 } // namespace scoped

@@ -14,6 +14,24 @@ namespace iostream_operators {
     return os << details::format(e);
   }
 
+  namespace details {
+      template<typename E, typename Traits>
+      void read_enum(std::basic_istream<char, Traits>& is, E& value, std::basic_string<char, Traits>& s, std::true_type /*is_bitflag*/) {
+          if (const auto v = enchantum::cast_bitflag<E>(s))
+            value = *v;
+          else
+            is.setstate(std::ios_base::failbit);
+      }
+
+      template<typename E, typename Traits>
+      void read_enum(std::basic_istream<char, Traits>& is, E& value, std::basic_string<char, Traits>& s, std::false_type /*is_bitflag*/) {
+          if (const auto v = enchantum::cast<E>(s))
+            value = *v;
+          else
+            is.setstate(std::ios_base::failbit);
+      }
+  }
+
   template<typename Traits, ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
   auto operator>>(std::basic_istream<char, Traits>& is, E& value) -> decltype((value = E{}, is))
   // sfinae to check whether value is assignable
@@ -23,18 +41,8 @@ namespace iostream_operators {
     if (!is)
       return is;
 
-    if constexpr (is_bitflag<E>) {
-      if (const auto v = enchantum::cast_bitflag<E>(s))
-        value = *v;
-      else
-        is.setstate(std::ios_base::failbit);
-    }
-    else {
-      if (const auto v = enchantum::cast<E>(s))
-        value = *v;
-      else
-        is.setstate(std::ios_base::failbit);
-    }
+    details::read_enum(is, value, s, std::bool_constant<is_bitflag<E>>{});
+
     return is;
   }
 } // namespace iostream_operators

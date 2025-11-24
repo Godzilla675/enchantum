@@ -6,6 +6,9 @@
 #include <type_traits>
 #include <utility>
 
+#include "details/polyfills/traits.hpp"
+// #include "details/constexpr_if.hpp" // Not needed if we use tag dispatch
+
 #ifndef ENCHANTUM_ASSERT
   #include <cassert>
 // clang-format off
@@ -25,22 +28,58 @@
   #define ENCHANTUM_MIN_RANGE (-ENCHANTUM_MAX_RANGE)
 #endif
 
+// Define nodiscard macro if not available
+#ifndef ENCHANTUM_NODISCARD
+#if __cplusplus < 201703L
+  #if defined(__has_cpp_attribute)
+    #if __has_cpp_attribute(nodiscard)
+      #define ENCHANTUM_NODISCARD [[nodiscard]]
+    #else
+      #define ENCHANTUM_NODISCARD
+    #endif
+  #else
+    #define ENCHANTUM_NODISCARD
+  #endif
+#else
+  #define ENCHANTUM_NODISCARD [[nodiscard]]
+#endif
+#endif
+
 namespace enchantum {
 
-template<typename T, bool = std::is_enum_v<T>>
-inline constexpr bool is_scoped_enum = false;
+// Polyfill std::is_enum_v if C++14
+#if __cplusplus < 201703L
+template<typename T>
+static constexpr bool is_enum_v = std::is_enum<T>::value;
+template<typename T>
+static constexpr bool is_convertible_v = std::is_convertible<T, std::underlying_type_t<T>>::value;
+template<typename From, typename To>
+static constexpr bool is_convertible_v = std::is_convertible<From, To>::value;
+template<typename T>
+static constexpr bool is_signed_v = std::is_signed<T>::value;
+template<typename T, typename U>
+static constexpr bool is_same_v = std::is_same<T, U>::value;
+#else
+using std::is_enum_v;
+using std::is_convertible_v;
+using std::is_signed_v;
+using std::is_same_v;
+#endif
+
+template<typename T, bool = is_enum_v<T>>
+static constexpr bool is_scoped_enum = false;
 
 template<typename E>
-inline constexpr bool is_scoped_enum<E, true> = !std::is_convertible_v<E, std::underlying_type_t<E>>;
+static constexpr bool is_scoped_enum<E, true> = !is_convertible_v<E, std::underlying_type_t<E>>;
 
 template<typename E>
-inline constexpr bool is_unscoped_enum = std::is_enum_v<E> && !is_scoped_enum<E>;
+static constexpr bool is_unscoped_enum = is_enum_v<E> && !is_scoped_enum<E>;
 
 template<typename E, typename = void>
-inline constexpr bool has_fixed_underlying_type = false;
+static constexpr bool has_fixed_underlying_type = false;
 
 template<typename E>
-inline constexpr bool has_fixed_underlying_type<E, decltype(void(E{0}))> = std::is_enum_v<E>;
+static constexpr bool has_fixed_underlying_type<E, decltype(void(E{0}))> = is_enum_v<E>;
 
 
 #ifdef __cpp_concepts
@@ -49,10 +88,10 @@ template<typename T>
 concept Enum = std::is_enum_v<T>;
 
 template<Enum E>
-inline constexpr bool is_bitflag = requires(E e) {
+static constexpr bool is_bitflag = requires(E e) {
   requires std::same_as<decltype(e & e), bool> || std::same_as<decltype(e & e), E>;
   { ~e } -> std::same_as<E>;
-  { e | e } -> std::same_as<E>;
+  { e | e } -> std::same_as<E&>;
   { e &= e } -> std::same_as<E&>;
   { e |= e } -> std::same_as<E&>;
 };
@@ -83,19 +122,19 @@ concept EnumFixedUnderlying = Enum<T> && requires { T{0}; };
 
 
 template<typename E, typename = void>
-inline constexpr bool is_bitflag = false;
+static constexpr bool is_bitflag = false;
 
 // clang-format off
 template<typename E>
-inline constexpr bool is_bitflag<E, 
-    std::void_t<
+static constexpr bool is_bitflag<E,
+    details::void_t<
     decltype(E{} & E{}),
     decltype(~E{}), 
     decltype(E{} | E{}), 
     decltype(std::declval<E&>() &= E{}), 
     decltype(std::declval<E&>() |= E{})
-    >> =  std::is_enum_v<E>
-    &&    (std::is_same_v<decltype(E{} & E{}),bool>  || std::is_same_v<decltype(E{} & E{}), E>) 
+    >> =  is_enum_v<E>
+    &&    (is_same_v<decltype(E{} & E{}),bool>  || is_same_v<decltype(E{} & E{}), E>)
     &&    std::is_same_v<decltype(~E{}), E> 
     &&    std::is_same_v<decltype(E{} | E{}), E>
     &&    std::is_same_v<decltype(std::declval<E&>() &= E{}), E&>
@@ -116,24 +155,41 @@ namespace details {
   {
     return a > b ? b : a;
   }
+
+  // Helper to clamp max range safely with mixed signs
+  template<typename T>
+  constexpr T clamp_range_helper(int max_range, T max_val, std::true_type /*is_signed*/) {
+      // Signed case. max_val is signed T.
+      // ENCHANTUM_MAX_RANGE is int (signed 256).
+      // Safe to compare.
+      return max_range > 0 ? static_cast<T>(details::Min(ENCHANTUM_MAX_RANGE, max_val)) : static_cast<T>(details::Max(ENCHANTUM_MIN_RANGE, max_val));
+  }
+
+  template<typename T>
+  constexpr T clamp_range_helper(int max_range, T max_val, std::false_type /*is_unsigned*/) {
+      // Unsigned case. max_val is unsigned T.
+      // ENCHANTUM_MAX_RANGE is int (signed 256).
+      // We want to compare unsigned(max_val) vs unsigned(256).
+      // Use Common type calculation to ensure comparison is safe and we cast correctly.
+      using Common = typename std::conditional<(sizeof(T) < sizeof(unsigned int)), unsigned int, T>::type;
+
+      return max_range > 0 ?
+          static_cast<T>(details::Min(static_cast<unsigned int>(ENCHANTUM_MAX_RANGE), static_cast<Common>(max_val)))
+          : static_cast<T>(0);
+  }
+
 #if !defined(__NVCOMPILER) && defined(__clang__) && __clang_major__ >= 20
+  // C++20 check code block
+#if __cplusplus >= 201703L
   template<typename E, auto V, typename = void>
-  inline constexpr bool is_valid_cast = false;
+  static constexpr bool is_valid_cast = false;
 
   template<typename E, auto V>
-  inline constexpr bool is_valid_cast<E, V, std::void_t<std::integral_constant<E, static_cast<E>(V)>>> = true;
+  static constexpr bool is_valid_cast<E, V, std::void_t<std::integral_constant<E, static_cast<E>(V)>>> = true;
 
   template<typename E, std::underlying_type_t<E> range, decltype(range) old_range>
   constexpr auto valid_cast_range_recurse() noexcept
   {
-    // this tests whether `static_cast`ing range is valid
-    // because C style enums stupidly is like a bit field
-    // `enum E { a,b,c,d = 3};` is like a bitfield `struct E { int val : 2;}`
-    // which means giving E.val a larger than 2 bit value is UB so is it for enums
-    // and gcc and msvc ignore this (for good)
-    // while clang makes it a subsituation failure which we can check for
-    // using std::inegral_constant makes sure this is a constant expression situation
-    // for SFINAE to occur
     if constexpr (is_valid_cast<E, range>)
       return valid_cast_range_recurse<E, range * 2, range>();
     else
@@ -154,35 +210,39 @@ namespace details {
     else
       return details::valid_cast_range_recurse<E, max_range, 0>();
   }
+#endif
 
 #endif
+
+  // Overload for bool underlying type
+  template<typename E>
+  constexpr bool enum_range_of_impl(int max_range, std::true_type /*is_bool*/) {
+      return max_range > 0;
+  }
+
+  // Overload for non-bool underlying type
+  template<typename E>
+  constexpr auto enum_range_of_impl(int max_range, std::false_type /*is_bool*/) -> typename std::underlying_type<E>::type {
+      using T = typename std::underlying_type<E>::type;
+      using L = std::numeric_limits<T>;
+#if !defined(__NVCOMPILER) && defined(__clang__) && __clang_major__ >= 20 && __cplusplus >= 201703L
+            constexpr auto Max = has_fixed_underlying_type<E> ? (L::max)() : details::valid_cast_range<E, 1>();
+            constexpr auto Min = has_fixed_underlying_type<E>
+                ? (L::min)()
+                : details::valid_cast_range<E, std::is_signed_v<T> ? -1 : 0>();
+#else
+            constexpr auto Max = (L::max)();
+            constexpr auto Min = (L::min)();
+#endif
+            (void)Min; // Only used in signed branch
+
+            return details::clamp_range_helper(max_range, max_range > 0 ? Max : Min, std::is_signed<T>{});
+  }
 
   template<typename E>
-  constexpr auto enum_range_of(const int max_range)
+  constexpr auto enum_range_of(const int max_range) -> typename std::conditional<std::is_same<std::underlying_type_t<E>, bool>::value, bool, typename std::underlying_type_t<E>>::type
   {
-    using T = std::underlying_type_t<E>;
-    if constexpr (std::is_same_v<bool, T>) {
-      return max_range > 0;
-    }
-    else {
-      using L = std::numeric_limits<T>;
-#if !defined(__NVCOMPILER) && defined(__clang__) && __clang_major__ >= 20
-      constexpr auto Max = has_fixed_underlying_type<E> ? (L::max)() : details::valid_cast_range<E, 1>();
-      constexpr auto Min = has_fixed_underlying_type<E>
-        ? (L::min)()
-        : details::valid_cast_range<E, std::is_signed_v<T> ? -1 : 0>();
-#else
-      constexpr auto Max = (L::max)();
-      constexpr auto Min = (L::min)();
-#endif
-      (void)Min; // Only used in signed branch
-      if constexpr (std::is_signed_v<T>) {
-        return max_range > 0 ? details::Min(ENCHANTUM_MAX_RANGE, Max) : details::Max(ENCHANTUM_MIN_RANGE, Min);
-      }
-      else {
-        return max_range > 0 ? details::Min(static_cast<unsigned int>(ENCHANTUM_MAX_RANGE), Max) : 0;
-      }
-    }
+      return details::enum_range_of_impl<E>(max_range, std::is_same<std::underlying_type_t<E>, bool>{});
   }
 } // namespace details
 
@@ -199,9 +259,9 @@ public:
 
 namespace details {
   template<typename T,typename = void>
-  inline constexpr bool has_specialized_traits = true;
+  static constexpr bool has_specialized_traits = true;
   template<typename T>
-  inline constexpr bool has_specialized_traits<T, typename enum_traits<T>::zxshady_enchantum_is_not_specialized_tag> = false;
+  static constexpr bool has_specialized_traits<T, typename enum_traits<T>::zxshady_enchantum_is_not_specialized_tag> = false;
 
 } // namespace details
 
@@ -211,6 +271,6 @@ namespace details {
   #define ENCHANTUM_DETAILS_ENUM_CONCEPT(Name)         Enum Name
   #define ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(Name) BitFlagEnum Name
 #else
-  #define ENCHANTUM_DETAILS_ENUM_CONCEPT(Name)         typename Name, std::enable_if_t<std::is_enum_v<Name>, int> = 0
+  #define ENCHANTUM_DETAILS_ENUM_CONCEPT(Name)         typename Name, std::enable_if_t<std::is_enum<typename std::decay<Name>::type>::value, int> = 0
   #define ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(Name) typename Name, std::enable_if_t<is_bitflag<Name>, int> = 0
 #endif

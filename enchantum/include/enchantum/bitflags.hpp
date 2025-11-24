@@ -3,6 +3,7 @@
 #include "details/string.hpp"
 #include "details/string_view.hpp"
 #include "details/optional.hpp"
+#include "details/constexpr_if.hpp"
 
 #include "enchantum.hpp"
 #include "generators.hpp"
@@ -14,41 +15,49 @@
   #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
 #endif
 
+// Define nodiscard macro if not available (handled in common.hpp now)
 
 namespace enchantum {
 
+// Polyfill for value_ors
+// Use manual loop to avoid range-for issues in some C++14 implementations or constexpr context nuances
 template<typename E>
-inline constexpr E value_ors = [] {
-  static_assert(is_bitflag<E>, "");
+constexpr E compute_value_ors() {
+  static_assert(is_bitflag<E>, "E must be a bitflag enum");
   using T = std::underlying_type_t<E>;
   T ret{};
-  for (const auto val : values_generator<E>)
-    ret |= static_cast<T>(val);
+  for (std::size_t i = 0; i < count<E>; ++i) {
+      ret |= static_cast<T>(values_generator<E>[i]);
+  }
   return static_cast<E>(ret);
-}();
+}
+
+template<typename E>
+static constexpr E value_ors = compute_value_ors<E>();
 
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-[[nodiscard]] constexpr bool contains_bitflag(const std::underlying_type_t<E> value) noexcept
+ENCHANTUM_NODISCARD constexpr bool contains_bitflag(const std::underlying_type_t<E> value) noexcept
 {
-  if constexpr (!has_zero_flag<E>)
+  if (!has_zero_flag<E>) {
     if (value == 0)
       return false;
+  }
 
   return value == (static_cast<std::underlying_type_t<E>>(value_ors<E>) & value);
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-[[nodiscard]] constexpr bool contains_bitflag(const E value) noexcept
+ENCHANTUM_NODISCARD constexpr bool contains_bitflag(const E value) noexcept
 {
   return enchantum::contains_bitflag<E>(static_cast<std::underlying_type_t<E>>(value));
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-[[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+ENCHANTUM_NODISCARD constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
 {
   std::size_t pos = 0;
-  for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
+  for (std::size_t i = s.find(sep); i != string_view::npos; i = s.find(sep, pos)) {
     if (!enchantum::contains<E>(s.substr(pos, i - pos), binary_pred))
       return false;
     pos = i + 1;
@@ -58,10 +67,10 @@ template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
 
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-[[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep = '|') noexcept
+ENCHANTUM_NODISCARD constexpr bool contains_bitflag(const string_view s, const char sep = '|') noexcept
 {
   std::size_t pos = 0;
-  for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
+  for (std::size_t i = s.find(sep); i != string_view::npos; i = s.find(sep, pos)) {
     if (!enchantum::contains<E>(s.substr(pos, i - pos)))
       return false;
     pos = i + 1;
@@ -71,12 +80,14 @@ template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
 
 
 template<typename String = string, ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-[[nodiscard]] constexpr String to_string_bitflag(const E value, const char sep = '|')
+ENCHANTUM_NODISCARD constexpr String to_string_bitflag(const E value, const char sep = '|')
 {
   using T = std::underlying_type_t<E>;
-  if constexpr (has_zero_flag<E>)
+
+  if (has_zero_flag<E>) {
     if (static_cast<T>(value) == 0)
-      return String(names_generator<E>[0]);
+      return String(names_generator<E>[0].data(), names_generator<E>[0].size());
+  }
 
   String name;
   T      check_value = 0;
@@ -96,32 +107,34 @@ template<typename String = string, ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-[[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+ENCHANTUM_NODISCARD constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
 {
   using T = std::underlying_type_t<E>;
   T           check_value{};
   std::size_t pos = 0;
-  for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
-    if (const auto v = enchantum::cast<E>(s.substr(pos, i - pos), binary_pred))
+  for (std::size_t i = s.find(sep); i != string_view::npos; i = s.find(sep, pos)) {
+    const auto v = enchantum::cast<E>(s.substr(pos, i - pos), binary_pred);
+    if (v)
       check_value |= static_cast<T>(*v);
     else
       return optional<E>();
     pos = i + 1;
   }
 
-  if (const auto v = enchantum::cast<E>(s.substr(pos), binary_pred))
+  const auto v = enchantum::cast<E>(s.substr(pos), binary_pred);
+  if (v)
     return optional<E>(static_cast<E>(check_value | static_cast<T>(*v)));
   return optional<E>();
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-[[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep = '|') noexcept
+ENCHANTUM_NODISCARD constexpr optional<E> cast_bitflag(const string_view s, const char sep = '|') noexcept
 {
   return enchantum::cast_bitflag<E>(s, sep, [](const auto& a, const auto& b) { return a == b; });
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
-[[nodiscard]] constexpr optional<E> cast_bitflag(const std::underlying_type_t<E> value) noexcept
+ENCHANTUM_NODISCARD constexpr optional<E> cast_bitflag(const std::underlying_type_t<E> value) noexcept
 {
   return enchantum::contains_bitflag<E>(value) ? optional<E>(static_cast<E>(value)) : optional<E>();
 }
