@@ -42,7 +42,7 @@
   }
 #else
   // C++14
-  #define ENCHANTUM_INLINE_VAR
+  #define ENCHANTUM_INLINE_VAR static constexpr
   #define ENCHANTUM_HAS_CPP17 0
   
   // Provide _v shortcuts

@@ -28,6 +28,12 @@ ENCHANTUM_ALIAS_STRING_VIEW;
   #else
     // C++14 polyfill: A minimal string_view implementation
     class string_view {
+    private:
+      // constexpr strlen for C++14
+      static constexpr size_type constexpr_strlen(const char* str) noexcept {
+        return str ? (*str ? 1 + constexpr_strlen(str + 1) : 0) : 0;
+      }
+      
     public:
       using value_type = char;
       using size_type = std::size_t;
@@ -43,7 +49,7 @@ ENCHANTUM_ALIAS_STRING_VIEW;
         : data_(str), size_(len) {}
       
       constexpr string_view(const char* str) noexcept 
-        : data_(str), size_(str ? std::char_traits<char>::length(str) : 0) {}
+        : data_(str), size_(constexpr_strlen(str)) {}
       
       string_view(const std::string& str) noexcept 
         : data_(str.data()), size_(str.size()) {}
