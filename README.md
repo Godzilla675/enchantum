@@ -1,11 +1,36 @@
 # Enchantum
 
-**Enchantum** (short for "enchant enum") is a modern **C++17** header-only library for **compile-time enum reflection**. It provides fast, lightweight access to enum values, names, and bitflags all without macros or boilerplate.
+**Enchantum** (short for "enchant enum") is a modern **C++14/17** header-only library for **compile-time enum reflection**. It provides fast, lightweight access to enum values, names, and bitflags all without macros or boilerplate.
 
 > Every year, countless turtles perish due to the pollution caused by slow, bloated build times.  
  Save the turtles — and your compile times — by switching to enchantum!
 
 <sup><sub>Source: I made it up.</sup></sub>
+
+## C++14 Support
+
+Enchantum provides C++14 support with minimal drawbacks:
+
+### Compatibility
+- **Minimum C++ Standard**: C++14
+- **Public API**: Fully C++14 compatible
+  - Custom implementations of `std::optional` and `std::string_view` are automatically used when compiling in C++14 mode
+  - All type traits work in C++14
+- **Internal Implementation**: Uses C++17 features (specifically `template<auto>` non-type template parameters) for compile-time name extraction
+- **Compiler Requirements**: GCC 9+, Clang 8+, or MSVC 19.24+ (all support both C++14 and C++17)
+
+### Usage
+You can use enchantum in your C++14 projects:
+```cpp
+// Your C++14 code
+enum class Color { Red, Green, Blue };
+
+auto name = enchantum::to_string(Color::Red);  // Works!
+enchantum::optional<Color> c = enchantum::cast<Color>("Green");  // Works!
+```
+
+### Note
+While you can write C++14 code that uses enchantum, the library headers themselves use C++17 features internally. This is transparent to users - simply ensure your compiler supports C++17 (which all supported compilers do). The library automatically provides C++14-compatible types in its public API.
 
 Key Features
 

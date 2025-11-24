@@ -23,6 +23,12 @@ template<typename...>
 using void_t = void;
 #endif
 
+// bool_constant (C++17 feature backported to C++14)
+#if !defined(__cpp_lib_bool_constant)
+template<bool B>
+using bool_constant = integral_constant<bool, B>;
+#endif
+
 // Type trait _v helpers (C++17 feature backported to C++14)
 #if !defined(__cpp_lib_type_trait_variable_templates)
 
@@ -58,9 +64,6 @@ constexpr bool is_rvalue_reference_v = is_rvalue_reference<T>::value;
 
 template<typename T>
 constexpr bool is_member_object_pointer_v = is_member_object_pointer<T>::value;
-
-template<typename T>
-constexpr bool is_member_function_pointer_v = is_member_function_pointer<T>::value;
 
 template<typename T>
 constexpr bool is_member_function_pointer_v = is_member_function_pointer<T>::value;

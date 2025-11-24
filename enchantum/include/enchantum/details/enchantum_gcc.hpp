@@ -1,6 +1,7 @@
 #include "../common.hpp"
 #include "../type_name.hpp"
 #include "shared.hpp"
+#include "cpp14_compat.hpp"
 #include <array>
 #include <cassert>
 #include <climits>
@@ -26,6 +27,7 @@ namespace details {
 
 
   // this is needed since gcc transforms "{anonymous}" into "<unnamed>" for values
+#if ENCHANTUM_HAS_CPP17
   template<auto Enum>
   constexpr auto enum_in_array_name_size() noexcept
   {
@@ -36,6 +38,20 @@ namespace details {
                          SZC(__PRETTY_FUNCTION__) -
                            SZC("constexpr auto enchantum::details::enum_in_array_name_size() [with auto Enum = ]"));
     using E = decltype(Enum);
+#else
+  template<typename E, E Enum>
+  constexpr auto enum_in_array_name_size() noexcept
+  {
+    auto s  = string_view(__PRETTY_FUNCTION__ +
+                           SZC("constexpr auto enchantum::details::enum_in_array_name_size() [with E = "),
+                         SZC(__PRETTY_FUNCTION__) -
+                           SZC("constexpr auto enchantum::details::enum_in_array_name_size() [with E = ; E Enum = ]"));
+    // Find the end of the first template parameter (type E)
+    auto semicolon_pos = s.find(';');
+    if (semicolon_pos != s.npos) {
+      s.remove_prefix(semicolon_pos + SZC("; E Enum = "));
+    }
+#endif
     // if scoped
     ENCHANTUM_IF_CONSTEXPR (!std::is_convertible_v<E, std::underlying_type_t<E>>) {
       return s[0] == '(' ? s.size() - SZC("()0") : s.rfind(':') - 1;
@@ -45,13 +61,15 @@ namespace details {
         s.remove_prefix(SZC("("));
         s.remove_suffix(SZC(")0"));
       }
-      if (const auto pos = s.rfind(':'); pos != s.npos)
+      auto pos = s.rfind(':');
+      if (pos != s.npos)
         return pos - 1;
       return std::size_t{0};
     }
   }
 
 #if __GNUC__ == 10
+  #if ENCHANTUM_HAS_CPP17
   template<auto V>
   constexpr auto gcc10_workaround() noexcept
   {
@@ -72,7 +90,8 @@ namespace details {
     else ENCHANTUM_IF_CONSTEXPR (static_cast<T>(V) == (std::numeric_limits<T>::max)()) {
       constexpr auto  s      = details::enum_in_array_name_size<E{}>();
       constexpr auto& tyname = raw_type_name<E>;
-      if (constexpr auto pos = tyname.rfind("::"); pos != tyname.npos) {
+      auto pos = tyname.rfind("::");
+      if (pos != tyname.npos) {
         return s + tyname.substr(pos).size();
       }
       else {
@@ -83,21 +102,73 @@ namespace details {
       return details::gcc10_workaround<static_cast<E>(static_cast<T>(V) + 1)>();
     }
   }
+  #else
+  template<typename E, E V>
+  constexpr auto gcc10_workaround() noexcept
+  {
+    using T = std::underlying_type_t<E>;
+    constexpr auto prefix = SZC("constexpr auto enchantum::details::gcc10_workaround() [with E = ");
+    constexpr auto begin  = __PRETTY_FUNCTION__ + prefix;
+    // Find semicolon separating template parameters
+    string_view sv(begin);
+    auto semicolon = sv.find(';');
+    if (semicolon != sv.npos) {
+      sv.remove_prefix(semicolon + SZC("; E V = "));
+    }
+    ENCHANTUM_IF_CONSTEXPR (sv[0] == '(') {
+      std::size_t i = sv.size() - SZC("(");
+      auto end_ptr = sv.data() + sv.size() - 1;
+      while (*end_ptr != ')') {
+        --end_ptr;
+        --i;
+      }
+      --i;
+      return i;
+    }
+    else ENCHANTUM_IF_CONSTEXPR (static_cast<T>(V) == (std::numeric_limits<T>::max)()) {
+      constexpr auto  s      = details::enum_in_array_name_size<E, E{}>();
+      constexpr auto& tyname = raw_type_name<E>;
+      auto pos = tyname.rfind("::");
+      if (pos != tyname.npos) {
+        return s + tyname.substr(pos).size();
+      }
+      else {
+        return s + tyname.size();
+      }
+    }
+    else {
+      return details::gcc10_workaround<E, static_cast<E>(static_cast<T>(V) + 1)>();
+    }
+  }
+  #endif
 #endif
 
   template<typename Enum>
   constexpr auto length_of_enum_in_template_array_if_casting() noexcept
   {
     ENCHANTUM_IF_CONSTEXPR (is_scoped_enum<Enum>) {
+#if ENCHANTUM_HAS_CPP17
       return details::enum_in_array_name_size<Enum{}>();
+#else
+      return details::enum_in_array_name_size<Enum, Enum{}>();
+#endif
     }
     else {
 #if __GNUC__ == 10
+  #if ENCHANTUM_HAS_CPP17
       return details::gcc10_workaround<static_cast<Enum>((std::numeric_limits<std::underlying_type_t<Enum>>::min)())>();
+  #else
+      return details::gcc10_workaround<Enum, static_cast<Enum>((std::numeric_limits<std::underlying_type_t<Enum>>::min)())>();
+  #endif
 #else
+  #if ENCHANTUM_HAS_CPP17
       constexpr auto  s      = details::enum_in_array_name_size<Enum{}>();
+  #else
+      constexpr auto  s      = details::enum_in_array_name_size<Enum, Enum{}>();
+  #endif
       constexpr auto& tyname = raw_type_name<Enum>;
-      if (constexpr auto pos = tyname.rfind("::"); pos != tyname.npos) {
+      auto pos = tyname.rfind("::");
+      if (pos != tyname.npos) {
         return s + tyname.substr(pos).size();
       }
       else {
@@ -107,11 +178,21 @@ namespace details {
     }
   }
 
+#if ENCHANTUM_HAS_CPP17
   template<auto... Vs>
   constexpr auto var_name() noexcept
   {
     return __PRETTY_FUNCTION__ + SZC("constexpr auto enchantum::details::var_name() [with auto ...Vs = {");
   }
+#else
+  // C++14 fallback - this function is only used internally for edge cases
+  // For most enum reflection operations, C++14 support is provided through other code paths
+  template<typename E, E... Vs>
+  constexpr auto var_name() noexcept
+  {
+    return __PRETTY_FUNCTION__ + SZC("constexpr auto enchantum::details::var_name()");
+  }
+#endif
 
 
   template<bool IsBitFlag, typename IntType>
