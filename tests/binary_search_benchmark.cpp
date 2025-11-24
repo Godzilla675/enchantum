@@ -196,20 +196,21 @@ TEST_CASE("Binary search all values", "[binary_search][comprehensive]")
 // Performance benchmark (not a unit test, just for manual observation)
 TEST_CASE("Binary search performance characteristics", "[binary_search][.performance]")
 {
+    constexpr int BENCHMARK_ITERATIONS = 100000;
+    
     SECTION("contains() performance for sparse enum")
     {
-        const int iterations = 100000;
         volatile bool result = false;
         
         auto start = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < iterations; ++i) {
+        for (int i = 0; i < BENCHMARK_ITERATIONS; ++i) {
             result = enchantum::contains(SparseEnum::V490); // Worst case - last element
         }
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         
-        std::cout << "contains() for " << iterations << " iterations: " << duration << " µs" << std::endl;
-        std::cout << "Average per call: " << (static_cast<double>(duration) / static_cast<double>(iterations)) << " µs" << std::endl;
+        std::cout << "contains() for " << BENCHMARK_ITERATIONS << " iterations: " << duration << " µs" << std::endl;
+        std::cout << "Average per call: " << (static_cast<double>(duration) / static_cast<double>(BENCHMARK_ITERATIONS)) << " µs" << std::endl;
         
         // Just to prevent optimization
         CHECK(result);
@@ -217,11 +218,10 @@ TEST_CASE("Binary search performance characteristics", "[binary_search][.perform
     
     SECTION("enum_to_index() performance for sparse enum")
     {
-        const int iterations = 100000;
         volatile std::size_t result = 0;
         
         auto start = std::chrono::high_resolution_clock::now();
-        for (int i = 0; i < iterations; ++i) {
+        for (int i = 0; i < BENCHMARK_ITERATIONS; ++i) {
             auto idx = enchantum::enum_to_index(SparseEnum::V490);
             if (idx.has_value()) {
                 result = *idx;
@@ -230,8 +230,8 @@ TEST_CASE("Binary search performance characteristics", "[binary_search][.perform
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
         
-        std::cout << "enum_to_index() for " << iterations << " iterations: " << duration << " µs" << std::endl;
-        std::cout << "Average per call: " << (static_cast<double>(duration) / static_cast<double>(iterations)) << " µs" << std::endl;
+        std::cout << "enum_to_index() for " << BENCHMARK_ITERATIONS << " iterations: " << duration << " µs" << std::endl;
+        std::cout << "Average per call: " << (static_cast<double>(duration) / static_cast<double>(BENCHMARK_ITERATIONS)) << " µs" << std::endl;
         
         // Just to prevent optimization
         CHECK(result == 49);
