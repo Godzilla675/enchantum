@@ -56,7 +56,7 @@ namespace details {
   }
 
   template<typename T>
-  inline constexpr auto raw_type_name_func_var = raw_type_name_func<T>();
+  ENCHANTUM_INLINE_VAR constexpr auto raw_type_name_func_var = raw_type_name_func<T>();
 
 
   template<typename T>
@@ -77,18 +77,18 @@ namespace details {
   }
 
   template<typename T>
-  inline constexpr auto type_name_func_var = type_name_func<T>();
+  ENCHANTUM_INLINE_VAR constexpr auto type_name_func_var = type_name_func<T>();
 
 #undef SZC
 
 } // namespace details
 
 template<typename T>
-inline constexpr auto type_name = string_view(details::type_name_func_var<T>.data(),
+ENCHANTUM_INLINE_VAR constexpr auto type_name = string_view(details::type_name_func_var<T>.data(),
                                               details::type_name_func_var<T>.size() - 1);
 
 template<typename T>
-inline constexpr auto raw_type_name = string_view(details::raw_type_name_func_var<T>.data(),
+ENCHANTUM_INLINE_VAR constexpr auto raw_type_name = string_view(details::raw_type_name_func_var<T>.data(),
                                                   details::raw_type_name_func_var<T>.size() - 1);
 
 

@@ -27,6 +27,7 @@ cmake_install.cmake
 Testing
 Debug/
 build/
+build-*/
 buildClang/
 buildGCC/
 CMakeFiles/

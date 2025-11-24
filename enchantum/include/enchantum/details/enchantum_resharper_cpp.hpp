@@ -38,7 +38,7 @@ namespace details {
       T           values[max_elements]{};
       std::size_t count = 0;
 
-      if constexpr (IsBitFlag) {
+      ENCHANTUM_IF_CONSTEXPR (IsBitFlag) {
         if (const auto* name = __rscpp_enumerator_name(E(0))) {
           names[count]    = name;
           values[count++] = 0;

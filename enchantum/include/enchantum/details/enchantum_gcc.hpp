@@ -37,7 +37,7 @@ namespace details {
                            SZC("constexpr auto enchantum::details::enum_in_array_name_size() [with auto Enum = ]"));
     using E = decltype(Enum);
     // if scoped
-    if constexpr (!std::is_convertible_v<E, std::underlying_type_t<E>>) {
+    ENCHANTUM_IF_CONSTEXPR (!std::is_convertible_v<E, std::underlying_type_t<E>>) {
       return s[0] == '(' ? s.size() - SZC("()0") : s.rfind(':') - 1;
     }
     else {
@@ -59,7 +59,7 @@ namespace details {
     using T = std::underlying_type_t<E>;
     constexpr auto prefix = SZC("constexpr auto enchantum::details::gcc10_workaround() [with auto V = ");
     constexpr auto begin  = __PRETTY_FUNCTION__ + prefix;
-    if constexpr (begin[0] == '(') {
+    ENCHANTUM_IF_CONSTEXPR (begin[0] == '(') {
       std::size_t i   = SZC(__PRETTY_FUNCTION__) - prefix - SZC("(");
       const char* end = __PRETTY_FUNCTION__ + SZC(__PRETTY_FUNCTION__) - 1;
       while (*end != ')') {
@@ -69,7 +69,7 @@ namespace details {
       --i;
       return i;
     }
-    else if constexpr (static_cast<T>(V) == (std::numeric_limits<T>::max)()) {
+    else ENCHANTUM_IF_CONSTEXPR (static_cast<T>(V) == (std::numeric_limits<T>::max)()) {
       constexpr auto  s      = details::enum_in_array_name_size<E{}>();
       constexpr auto& tyname = raw_type_name<E>;
       if (constexpr auto pos = tyname.rfind("::"); pos != tyname.npos) {
@@ -88,7 +88,7 @@ namespace details {
   template<typename Enum>
   constexpr auto length_of_enum_in_template_array_if_casting() noexcept
   {
-    if constexpr (is_scoped_enum<Enum>) {
+    ENCHANTUM_IF_CONSTEXPR (is_scoped_enum<Enum>) {
       return details::enum_in_array_name_size<Enum{}>();
     }
     else {
@@ -138,7 +138,7 @@ namespace details {
         // although gcc implementation of std::char_traits::find is using a for loop internally
         // copying the code of the function makes it way slower to compile, this was surprising.
         const auto commapos = static_cast<std::size_t>(std::char_traits<char>::find(str, UINT8_MAX, ',') - str);
-        if constexpr (IsBitFlag)
+        ENCHANTUM_IF_CONSTEXPR (IsBitFlag)
           values[valid_count] = index == 0 ? IntType{} : static_cast<IntType>(IntType{1} << (index - 1));
         else
           values[valid_count] = static_cast<IntType>(min + static_cast<IntType>(index));
@@ -171,7 +171,7 @@ namespace details {
   #define CAST(type, value) __builtin_bit_cast(type, value)
 #endif
         // dummy 0
-        if constexpr (sizeof(dependant) && is_bitflag<E>) // sizeof... to make contest dependant
+        ENCHANTUM_IF_CONSTEXPR (sizeof(dependant) && is_bitflag<E>) // sizeof... to make contest dependant
           return details::var_name<E{}, CAST(E, static_cast<Under>(Underlying{1} << Is))..., 0>();
         else
           return details::var_name<CAST(E, static_cast<Under>(static_cast<decltype(Min)>(Is) + Min))..., 0>();

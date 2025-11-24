@@ -60,7 +60,7 @@ namespace details {
       else {
         str += least_length_when_value;
         const auto commapos = details::find_semicolon(str);
-        if constexpr (IsBitFlag)
+        ENCHANTUM_IF_CONSTEXPR (IsBitFlag)
           values[valid_count] = index == 0 ? IntType{} : static_cast<IntType>(IntType{1} << (index - 1));
         else
           values[valid_count] = static_cast<IntType>(min + static_cast<IntType>(index));
@@ -89,7 +89,7 @@ namespace details {
         constexpr _* A{};
         using Underlying = std::make_unsigned_t<std::conditional_t<std::is_same_v<bool, T>, unsigned char, T>>;
         // dummy 0
-        if constexpr (always_true && is_bitflag<E>) // sizeof... to make contest dependant
+        ENCHANTUM_IF_CONSTEXPR (always_true && is_bitflag<E>) // sizeof... to make contest dependant
           return details::var_name<A, static_cast<E>(!always_true), static_cast<E>(Underlying(1) << Is)..., 0>();
         else
           return details::var_name<A, static_cast<E>(static_cast<MinT>(Is) + Min)..., int(!always_true)>();

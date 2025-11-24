@@ -26,7 +26,7 @@ namespace details {
   template<typename BinaryPredicate>
   constexpr bool call_predicate(const BinaryPredicate binary_pred, const string_view a, const string_view b)
   {
-    if constexpr (std::is_invocable_v<const BinaryPredicate&, const char&, const char&>) {
+    ENCHANTUM_IF_CONSTEXPR (std::is_invocable_v<const BinaryPredicate&, const char&, const char&>) {
       const auto a_size = a.size();
       if (a_size != b.size())
         return false;
@@ -69,8 +69,8 @@ template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
   if (value < T(min<E>) || value > T(max<E>))
     return false;
 
-  if constexpr (is_contiguous_bitflag<E>) {
-    if constexpr (has_zero_flag<E>)
+  ENCHANTUM_IF_CONSTEXPR (is_contiguous_bitflag<E>) {
+    ENCHANTUM_IF_CONSTEXPR (has_zero_flag<E>)
       if (value == 0)
         return true;
     const auto u = static_cast<std::make_unsigned_t<T>>(value);
@@ -78,7 +78,7 @@ template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
     // std::has_single_bit
     return u != 0 && (u & (u - 1)) == 0;
   }
-  else if constexpr (is_contiguous<E>) {
+  else ENCHANTUM_IF_CONSTEXPR (is_contiguous<E>) {
     return true;
   }
   else {
@@ -133,15 +133,15 @@ namespace details {
     {
       using T = std::underlying_type_t<E>;
 
-      if constexpr (is_contiguous<E>) {
+      ENCHANTUM_IF_CONSTEXPR (is_contiguous<E>) {
         if (enchantum::contains(e)) {
           return optional<std::size_t>(std::size_t(T(e) - T(min<E>)));
         }
       }
-      else if constexpr (is_contiguous_bitflag<E>) {
+      else ENCHANTUM_IF_CONSTEXPR (is_contiguous_bitflag<E>) {
         if (enchantum::contains(e)) {
           constexpr bool has_zero = has_zero_flag<E>;
-          if constexpr (has_zero)
+          ENCHANTUM_IF_CONSTEXPR (has_zero)
             if (static_cast<T>(e) == 0)
               return optional<std::size_t>(0); // assumes 0 is the index of value `0`
 
@@ -199,12 +199,12 @@ namespace details {
 } // namespace details
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr details::index_to_enum_functor<E> index_to_enum{};
+ENCHANTUM_INLINE_VAR constexpr details::index_to_enum_functor<E> index_to_enum{};
 
-inline constexpr details::enum_to_index_functor enum_to_index{};
+ENCHANTUM_INLINE_VAR constexpr details::enum_to_index_functor enum_to_index{};
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr details::cast_functor<E> cast{};
+ENCHANTUM_INLINE_VAR constexpr details::cast_functor<E> cast{};
 
 
 namespace details {
@@ -219,7 +219,7 @@ namespace details {
   };
 
 } // namespace details
-inline constexpr details::to_string_functor to_string{};
+ENCHANTUM_INLINE_VAR constexpr details::to_string_functor to_string{};
 
 
 } // namespace enchantum

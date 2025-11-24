@@ -23,7 +23,7 @@ namespace iostream_operators {
     if (!is)
       return is;
 
-    if constexpr (is_bitflag<E>) {
+    ENCHANTUM_IF_CONSTEXPR (is_bitflag<E>) {
       if (const auto v = enchantum::cast_bitflag<E>(s))
         value = *v;
       else

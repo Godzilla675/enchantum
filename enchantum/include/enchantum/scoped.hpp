@@ -81,10 +81,10 @@ namespace scoped {
   } // namespace details
 
 
-  inline constexpr details::to_scoped_string_functor to_string;
+  ENCHANTUM_INLINE_VAR constexpr details::to_scoped_string_functor to_string;
 
   template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-  inline constexpr details::scoped_cast_functor<E> cast;
+  ENCHANTUM_INLINE_VAR constexpr details::scoped_cast_functor<E> cast;
 
   template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
   [[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
@@ -115,7 +115,7 @@ namespace scoped {
   [[nodiscard]] constexpr String to_string_bitflag(const E value, const char sep = '|')
   {
     using T = std::underlying_type_t<E>;
-    if constexpr (has_zero_flag<E>)
+    ENCHANTUM_IF_CONSTEXPR (has_zero_flag<E>)
       if (static_cast<T>(value) == 0)
         return enchantum::scoped::to_string(value);
 

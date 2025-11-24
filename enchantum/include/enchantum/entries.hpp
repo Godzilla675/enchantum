@@ -74,7 +74,7 @@ namespace details {
   };
 
   template<typename E, bool NullTerminated, auto Min = enum_traits<E>::min, decltype(Min) Max = enum_traits<E>::max>
-  inline constexpr auto reflection_data_impl = details::reflect<E, NullTerminated, Min>(
+  ENCHANTUM_INLINE_VAR constexpr auto reflection_data_impl = details::reflect<E, NullTerminated, Min>(
     std::make_index_sequence<details::get_index_sequence_max(is_bitflag<E>,
                                                              has_fixed_underlying_type<E>,
                                                              sizeof(E),
@@ -87,9 +87,9 @@ namespace details {
   template<typename T, typename U>
   constexpr bool cmp_less(const T t, const U u) noexcept
   {
-    if constexpr (std::is_signed_v<T> == std::is_signed_v<U>)
+    ENCHANTUM_IF_CONSTEXPR (std::is_signed_v<T> == std::is_signed_v<U>)
       return t < u;
-    else if constexpr (std::is_signed_v<T>)
+    else ENCHANTUM_IF_CONSTEXPR (std::is_signed_v<T>)
       return t < 0 || std::make_unsigned_t<T>(t) < u;
     else
       return u >= 0 && t < std::make_unsigned_t<U>(u);
@@ -126,7 +126,7 @@ namespace details {
     using StringLengthType = std::conditional_t<(elements.total_string_length < UINT8_MAX), std::uint8_t, std::uint16_t>;
 
 #if ENCHANTUM_CHECK_OUT_OF_BOUNDS_BY >= 2
-    if constexpr (
+    ENCHANTUM_IF_CONSTEXPR (
   #if __clang_major__ >= 20
       has_fixed_underlying_type<E> &&
   #endif
@@ -163,13 +163,13 @@ namespace details {
 
 
   template<typename E, bool NullTerminated>
-  inline constexpr auto reflection_data_string_storage = details::reflection_data_impl<E, NullTerminated>.strings;
+  ENCHANTUM_INLINE_VAR constexpr auto reflection_data_string_storage = details::reflection_data_impl<E, NullTerminated>.strings;
 
   template<typename E, bool NullTerminated>
-  inline constexpr auto reflection_data = details::get_reflection_data<E, NullTerminated>();
+  ENCHANTUM_INLINE_VAR constexpr auto reflection_data = details::get_reflection_data<E, NullTerminated>();
 
   template<typename E, bool NullTerminated>
-  inline constexpr auto reflection_string_indices = reflection_data<E, NullTerminated>.string_indices;
+  ENCHANTUM_INLINE_VAR constexpr auto reflection_string_indices = reflection_data<E, NullTerminated>.string_indices;
 
   template<typename E, typename Pair, bool NullTerminated, typename Reflected = int>
   constexpr auto get_entries()
@@ -244,14 +244,14 @@ namespace details {
 } // namespace details
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr auto values = details::get_values<E>();
+ENCHANTUM_INLINE_VAR constexpr auto values = details::get_values<E>();
 
 #ifdef __cpp_concepts
 template<Enum E, typename String = string_view, bool NullTerminated = true>
 #else
 template<typename E, typename String = string_view, bool NullTerminated = true, std::enable_if_t<std::is_enum_v<E>, int> = 0>
 #endif
-inline constexpr auto names = details::get_names<E, String, NullTerminated>();
+ENCHANTUM_INLINE_VAR constexpr auto names = details::get_names<E, String, NullTerminated>();
 
 
 #ifdef __cpp_concepts
@@ -262,22 +262,22 @@ template<typename E,
          bool NullTerminated                      = true,
          std::enable_if_t<std::is_enum_v<E>, int> = 0>
 #endif
-inline constexpr auto entries = enchantum::details::get_entries<E, Pair, NullTerminated>();
+ENCHANTUM_INLINE_VAR constexpr auto entries = enchantum::details::get_entries<E, Pair, NullTerminated>();
 
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr auto min = values<E>.front();
+ENCHANTUM_INLINE_VAR constexpr auto min = values<E>.front();
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr auto max = values<E>.back();
+ENCHANTUM_INLINE_VAR constexpr auto max = values<E>.back();
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr std::size_t count = values<E>.size();
+ENCHANTUM_INLINE_VAR constexpr std::size_t count = values<E>.size();
 
 
 template<typename E>
-inline constexpr bool has_zero_flag = [](const auto is_bitflag) {
-  if constexpr (is_bitflag.value) {
+ENCHANTUM_INLINE_VAR constexpr bool has_zero_flag = [](const auto is_bitflag) {
+  ENCHANTUM_IF_CONSTEXPR (is_bitflag.value) {
     for (const auto v : values<E>)
       if (static_cast<std::underlying_type_t<E>>(v) == 0)
         return true;
@@ -286,15 +286,15 @@ inline constexpr bool has_zero_flag = [](const auto is_bitflag) {
 }(std::bool_constant<is_bitflag<E>>{});
 
 template<typename E>
-inline constexpr bool is_contiguous = static_cast<std::size_t>(
+ENCHANTUM_INLINE_VAR constexpr bool is_contiguous = static_cast<std::size_t>(
                                         enchantum::to_underlying(max<E>) - enchantum::to_underlying(min<E>)) +
     1 ==
   count<E>;
 
 
 template<typename E>
-inline constexpr bool is_contiguous_bitflag = [](const auto is_bitflag) {
-  if constexpr (is_bitflag.value) {
+ENCHANTUM_INLINE_VAR constexpr bool is_contiguous_bitflag = [](const auto is_bitflag) {
+  ENCHANTUM_IF_CONSTEXPR (is_bitflag.value) {
     constexpr auto& enums = values<E>;
     using T               = std::underlying_type_t<E>;
     for (auto i = std::size_t{has_zero_flag<E>}; i < enums.size() - 1; ++i)

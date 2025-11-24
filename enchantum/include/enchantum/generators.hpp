@@ -180,14 +180,14 @@ namespace details {
       {
         using T = std::underlying_type_t<E>;
 
-        if constexpr (is_contiguous<E>) {
+        ENCHANTUM_IF_CONSTEXPR (is_contiguous<E>) {
           return static_cast<E>(static_cast<T>(min<E>) + static_cast<T>(this->index));
         }
-        else if constexpr (is_contiguous_bitflag<E>) {
+        else ENCHANTUM_IF_CONSTEXPR (is_contiguous_bitflag<E>) {
           using UT                       = std::make_unsigned_t<T>;
           constexpr auto real_min_offset = details::countr_zero(static_cast<UT>(values<E>[has_zero_flag<E>]));
 
-          if constexpr (has_zero_flag<E>)
+          ENCHANTUM_IF_CONSTEXPR (has_zero_flag<E>)
             if (this->index == 0)
               return E{};
           return static_cast<E>(UT{1} << (real_min_offset + static_cast<UT>(this->index - has_zero_flag<E>)));
@@ -236,21 +236,21 @@ namespace details {
 } // namespace details
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr details::values_generator_t<E> values_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::values_generator_t<E> values_generator{};
 
 #ifdef __cpp_concepts
 template<Enum E, typename StringView = string_view, bool NullTerminated = true>
-inline constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
 
 template<Enum E, typename Pair = std::pair<E, string_view>, bool NullTerminated = true>
-inline constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
 
 #else
 template<typename E, typename StringView = string_view, bool NullTerminated = true, std::enable_if_t<std::is_enum_v<E>, int> = 0>
-inline constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
 
 template<typename E, typename Pair = std::pair<E, string_view>, bool NullTerminated = true, std::enable_if_t<std::is_enum_v<E>, int> = 0>
-inline constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
 
 #endif
 

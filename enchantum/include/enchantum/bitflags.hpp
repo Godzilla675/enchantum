@@ -18,7 +18,7 @@
 namespace enchantum {
 
 template<typename E>
-inline constexpr E value_ors = [] {
+ENCHANTUM_INLINE_VAR constexpr E value_ors = [] {
   static_assert(is_bitflag<E>, "");
   using T = std::underlying_type_t<E>;
   T ret{};
@@ -31,7 +31,7 @@ inline constexpr E value_ors = [] {
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
 [[nodiscard]] constexpr bool contains_bitflag(const std::underlying_type_t<E> value) noexcept
 {
-  if constexpr (!has_zero_flag<E>)
+  ENCHANTUM_IF_CONSTEXPR (!has_zero_flag<E>)
     if (value == 0)
       return false;
 
@@ -74,7 +74,7 @@ template<typename String = string, ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
 [[nodiscard]] constexpr String to_string_bitflag(const E value, const char sep = '|')
 {
   using T = std::underlying_type_t<E>;
-  if constexpr (has_zero_flag<E>)
+  ENCHANTUM_IF_CONSTEXPR (has_zero_flag<E>)
     if (static_cast<T>(value) == 0)
       return String(names_generator<E>[0]);
 

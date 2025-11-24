@@ -9,9 +9,9 @@ namespace details {
   template<typename E>
   std::string format(E e) noexcept
   {
-    if constexpr (is_bitflag<E>) {
+    ENCHANTUM_IF_CONSTEXPR (is_bitflag<E>) {
       if (const auto name = enchantum::to_string_bitflag(e); !name.empty()) {
-        if constexpr (std::is_same_v<std::string, string>) {
+        ENCHANTUM_IF_CONSTEXPR (std::is_same_v<std::string, string>) {
           return name;
         }
         else {

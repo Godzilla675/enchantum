@@ -31,7 +31,7 @@ namespace details {
     auto s = string_view{__FUNCSIG__ + SZC("auto __cdecl enchantum::details::enum_in_array_name_size<"),
                          SZC(__FUNCSIG__) - SZC("auto __cdecl enchantum::details::enum_in_array_name_size<>(void) noexcept")};
 
-    if constexpr (is_scoped_enum<decltype(Enum)>) {
+    ENCHANTUM_IF_CONSTEXPR (is_scoped_enum<decltype(Enum)>) {
       if (s[0] == '(') {
         s.remove_prefix(SZC("(enum "));
         s.remove_suffix(SZC(")0x0"));
@@ -94,7 +94,7 @@ namespace details {
       if (*str == '(') {
 #endif
 #if ENCHANTUM_ENABLE_MSVC_SPEEDUP
-        if constexpr (skip_work_if_neg != 0) {
+        ENCHANTUM_IF_CONSTEXPR (skip_work_if_neg != 0) {
           const auto i = min + static_cast<IntType>(index);
           str += least_length_when_casting + ((i < 0) * skip_work_if_neg);
         }
@@ -114,7 +114,7 @@ namespace details {
         // copying the code of the function makes it way slower to compile, this was surprising.
 
 
-        if constexpr (IsBitFlag)
+        ENCHANTUM_IF_CONSTEXPR (IsBitFlag)
           values[valid_count] = index == 0 ? IntType{} : static_cast<IntType>(IntType{1} << (index - 1));
         else
           values[valid_count] = static_cast<IntType>(min + static_cast<IntType>(index));
@@ -143,7 +143,7 @@ namespace details {
       constexpr auto str = [](const auto dependant) {
         constexpr bool always_true = sizeof(dependant) != 0;
         // dummy 0
-        if constexpr (always_true && is_bitflag<E>) // sizeof... to make contest dependant
+        ENCHANTUM_IF_CONSTEXPR (always_true && is_bitflag<E>) // sizeof... to make contest dependant
           return details::var_name<static_cast<E>(!always_true), static_cast<E>(Underlying(1) << Is)..., 0>();
         else
           return details::var_name<static_cast<E>(static_cast<MinT>(Is) + Min)..., int(!always_true)>();
