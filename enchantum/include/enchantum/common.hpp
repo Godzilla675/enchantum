@@ -25,31 +25,73 @@
   #define ENCHANTUM_MIN_RANGE (-ENCHANTUM_MAX_RANGE)
 #endif
 
+// C++14/17 compatibility layer
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
+  // C++17 or later
+  #define ENCHANTUM_INLINE_VAR inline
+  #define ENCHANTUM_HAS_CPP17 1
+  
+  // Use standard _v shortcuts
+  namespace enchantum {
+    using std::is_enum_v;
+    using std::is_convertible_v;
+    using std::is_same_v;
+    using std::is_signed_v;
+    using std::is_nothrow_invocable_v;
+    using std::underlying_type_t;
+  }
+#else
+  // C++14
+  #define ENCHANTUM_INLINE_VAR
+  #define ENCHANTUM_HAS_CPP17 0
+  
+  // Provide _v shortcuts
+  namespace enchantum {
+    template<typename T>
+    constexpr bool is_enum_v = std::is_enum<T>::value;
+    
+    template<typename From, typename To>
+    constexpr bool is_convertible_v = std::is_convertible<From, To>::value;
+    
+    template<typename T, typename U>
+    constexpr bool is_same_v = std::is_same<T, U>::value;
+    
+    template<typename T>
+    constexpr bool is_signed_v = std::is_signed<T>::value;
+    
+    template<typename Func, typename... Args>
+    constexpr bool is_nothrow_invocable_v = std::is_nothrow_invocable<Func, Args...>::value;
+    
+    template<typename T>
+    using underlying_type_t = typename std::underlying_type<T>::type;
+  }
+#endif
+
 namespace enchantum {
 
-template<typename T, bool = std::is_enum_v<T>>
-inline constexpr bool is_scoped_enum = false;
+template<typename T, bool = enchantum::is_enum_v<T>>
+ENCHANTUM_INLINE_VAR constexpr bool is_scoped_enum = false;
 
 template<typename E>
-inline constexpr bool is_scoped_enum<E, true> = !std::is_convertible_v<E, std::underlying_type_t<E>>;
+ENCHANTUM_INLINE_VAR constexpr bool is_scoped_enum<E, true> = !enchantum::is_convertible_v<E, enchantum::underlying_type_t<E>>;
 
 template<typename E>
-inline constexpr bool is_unscoped_enum = std::is_enum_v<E> && !is_scoped_enum<E>;
+ENCHANTUM_INLINE_VAR constexpr bool is_unscoped_enum = enchantum::is_enum_v<E> && !is_scoped_enum<E>;
 
 template<typename E, typename = void>
-inline constexpr bool has_fixed_underlying_type = false;
+ENCHANTUM_INLINE_VAR constexpr bool has_fixed_underlying_type = false;
 
 template<typename E>
-inline constexpr bool has_fixed_underlying_type<E, decltype(void(E{0}))> = std::is_enum_v<E>;
+ENCHANTUM_INLINE_VAR constexpr bool has_fixed_underlying_type<E, decltype(void(E{0}))> = enchantum::is_enum_v<E>;
 
 
 #ifdef __cpp_concepts
 
 template<typename T>
-concept Enum = std::is_enum_v<T>;
+concept Enum = enchantum::is_enum_v<T>;
 
 template<Enum E>
-inline constexpr bool is_bitflag = requires(E e) {
+ENCHANTUM_INLINE_VAR constexpr bool is_bitflag = requires(E e) {
   requires std::same_as<decltype(e & e), bool> || std::same_as<decltype(e & e), E>;
   { ~e } -> std::same_as<E>;
   { e | e } -> std::same_as<E>;
@@ -59,19 +101,19 @@ inline constexpr bool is_bitflag = requires(E e) {
 
 
 template<typename T>
-concept SignedEnum = Enum<T> && std::signed_integral<std::underlying_type_t<T>>;
+concept SignedEnum = Enum<T> && std::signed_integral<enchantum::underlying_type_t<T>>;
 
 template<typename T>
 concept UnsignedEnum = Enum<T> && !SignedEnum<T>;
 
 template<typename T>
-concept ScopedEnum = Enum<T> && (!std::is_convertible_v<T, std::underlying_type_t<T>>);
+concept ScopedEnum = Enum<T> && (!enchantum::is_convertible_v<T, enchantum::underlying_type_t<T>>);
 
 template<typename T>
 concept UnscopedEnum = Enum<T> && !ScopedEnum<T>;
 
 template<typename E, typename Underlying>
-concept EnumOfUnderlying = Enum<E> && std::same_as<std::underlying_type_t<E>, Underlying>;
+concept EnumOfUnderlying = Enum<E> && std::same_as<enchantum::underlying_type_t<E>, Underlying>;
 
 template<typename T>
 concept BitFlagEnum = Enum<T> && is_bitflag<T>;
@@ -83,23 +125,23 @@ concept EnumFixedUnderlying = Enum<T> && requires { T{0}; };
 
 
 template<typename E, typename = void>
-inline constexpr bool is_bitflag = false;
+ENCHANTUM_INLINE_VAR constexpr bool is_bitflag = false;
 
 // clang-format off
 template<typename E>
-inline constexpr bool is_bitflag<E, 
+ENCHANTUM_INLINE_VAR constexpr bool is_bitflag<E, 
     std::void_t<
     decltype(E{} & E{}),
     decltype(~E{}), 
     decltype(E{} | E{}), 
     decltype(std::declval<E&>() &= E{}), 
     decltype(std::declval<E&>() |= E{})
-    >> =  std::is_enum_v<E>
-    &&    (std::is_same_v<decltype(E{} & E{}),bool>  || std::is_same_v<decltype(E{} & E{}), E>) 
-    &&    std::is_same_v<decltype(~E{}), E> 
-    &&    std::is_same_v<decltype(E{} | E{}), E>
-    &&    std::is_same_v<decltype(std::declval<E&>() &= E{}), E&>
-    &&    std::is_same_v<decltype(std::declval<E&>() |= E{}), E&>
+    >> =  enchantum::is_enum_v<E>
+    &&    (enchantum::is_same_v<decltype(E{} & E{}),bool>  || enchantum::is_same_v<decltype(E{} & E{}), E>) 
+    &&    enchantum::is_same_v<decltype(~E{}), E> 
+    &&    enchantum::is_same_v<decltype(E{} | E{}), E>
+    &&    enchantum::is_same_v<decltype(std::declval<E&>() &= E{}), E&>
+    &&    enchantum::is_same_v<decltype(std::declval<E&>() |= E{}), E&>
     ;
 // clang-format on
 #endif
@@ -123,7 +165,7 @@ namespace details {
   template<typename E, auto V>
   inline constexpr bool is_valid_cast<E, V, std::void_t<std::integral_constant<E, static_cast<E>(V)>>> = true;
 
-  template<typename E, std::underlying_type_t<E> range, decltype(range) old_range>
+  template<typename E, enchantum::underlying_type_t<E> range, decltype(range) old_range>
   constexpr auto valid_cast_range_recurse() noexcept
   {
     // this tests whether `static_cast`ing range is valid
@@ -142,7 +184,7 @@ namespace details {
   template<typename E, int max_range>
   constexpr auto valid_cast_range() noexcept
   {
-    using T = std::underlying_type_t<E>;
+    using T = enchantum::underlying_type_t<E>;
     using L = std::numeric_limits<T>;
 
     if constexpr (max_range == 0)
@@ -160,8 +202,8 @@ namespace details {
   template<typename E>
   constexpr auto enum_range_of(const int max_range)
   {
-    using T = std::underlying_type_t<E>;
-    if constexpr (std::is_same_v<bool, T>) {
+    using T = enchantum::underlying_type_t<E>;
+    if constexpr (enchantum::is_same_v<bool, T>) {
       return max_range > 0;
     }
     else {
@@ -170,13 +212,13 @@ namespace details {
       constexpr auto Max = has_fixed_underlying_type<E> ? (L::max)() : details::valid_cast_range<E, 1>();
       constexpr auto Min = has_fixed_underlying_type<E>
         ? (L::min)()
-        : details::valid_cast_range<E, std::is_signed_v<T> ? -1 : 0>();
+        : details::valid_cast_range<E, enchantum::is_signed_v<T> ? -1 : 0>();
 #else
       constexpr auto Max = (L::max)();
       constexpr auto Min = (L::min)();
 #endif
       (void)Min; // Only used in signed branch
-      if constexpr (std::is_signed_v<T>) {
+      if constexpr (enchantum::is_signed_v<T>) {
         return max_range > 0 ? details::Min(ENCHANTUM_MAX_RANGE, Max) : details::Max(ENCHANTUM_MIN_RANGE, Min);
       }
       else {
@@ -190,7 +232,7 @@ namespace details {
 template<typename E>
 struct enum_traits {
 private:
-  using T = std::underlying_type_t<E>;
+  using T = enchantum::underlying_type_t<E>;
 public:
   using zxshady_enchantum_is_not_specialized_tag = void;
   static constexpr auto          max = details::enum_range_of<E>(1);
@@ -211,6 +253,6 @@ namespace details {
   #define ENCHANTUM_DETAILS_ENUM_CONCEPT(Name)         Enum Name
   #define ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(Name) BitFlagEnum Name
 #else
-  #define ENCHANTUM_DETAILS_ENUM_CONCEPT(Name)         typename Name, std::enable_if_t<std::is_enum_v<Name>, int> = 0
+  #define ENCHANTUM_DETAILS_ENUM_CONCEPT(Name)         typename Name, std::enable_if_t<enchantum::is_enum_v<Name>, int> = 0
   #define ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(Name) typename Name, std::enable_if_t<is_bitflag<Name>, int> = 0
 #endif

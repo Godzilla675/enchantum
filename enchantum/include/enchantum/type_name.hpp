@@ -35,7 +35,7 @@ namespace details {
                                      SZC(">(void) noexcept"));
 
     // clang-format off
-    constexpr auto prefix = std::is_enum_v<T> ? SZC("enum ") : 
+    constexpr auto prefix = enchantum::is_enum_v<T> ? SZC("enum ") : 
         std::is_class_v<T> ?  SZC("struct ") - (s[0] == 'c') :
         0;
 // clang-format on
@@ -84,11 +84,11 @@ namespace details {
 } // namespace details
 
 template<typename T>
-inline constexpr auto type_name = string_view(details::type_name_func_var<T>.data(),
+ENCHANTUM_INLINE_VAR constexpr auto type_name = string_view(details::type_name_func_var<T>.data(),
                                               details::type_name_func_var<T>.size() - 1);
 
 template<typename T>
-inline constexpr auto raw_type_name = string_view(details::raw_type_name_func_var<T>.data(),
+ENCHANTUM_INLINE_VAR constexpr auto raw_type_name = string_view(details::raw_type_name_func_var<T>.data(),
                                                   details::raw_type_name_func_var<T>.size() - 1);
 
 

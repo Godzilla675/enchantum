@@ -28,8 +28,8 @@ namespace details {
   constexpr auto reflect(std::index_sequence<Is...>) noexcept
   {
     using MinT = decltype(Min);
-    using T    = std::underlying_type_t<E>;
-    using U    = std::make_unsigned_t<std::conditional_t<std::is_same_v<bool, T>, unsigned char, T>>;
+    using T    = enchantum::underlying_type_t<E>;
+    using U    = std::make_unsigned_t<std::conditional_t<enchantum::is_same_v<bool, T>, unsigned char, T>>;
     constexpr bool        IsBitFlag    = is_bitflag<E>;
     constexpr std::size_t max_elements = sizeof...(Is) + IsBitFlag;
 

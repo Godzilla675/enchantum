@@ -89,8 +89,8 @@ namespace details {
   constexpr auto reflect(std::index_sequence<Is...>) noexcept
   {
     using MinT       = decltype(Min);
-    using T          = std::underlying_type_t<E>;
-    using Underlying = std::make_unsigned_t<std::conditional_t<std::is_same_v<bool, T>, unsigned char, T>>;
+    using T          = enchantum::underlying_type_t<E>;
+    using Underlying = std::make_unsigned_t<std::conditional_t<enchantum::is_same_v<bool, T>, unsigned char, T>>;
 
     constexpr auto elements_local = []() {
       constexpr auto ArraySize = sizeof...(Is) + is_bitflag<E>;
@@ -109,7 +109,7 @@ namespace details {
       constexpr auto enum_in_array_name = details::enum_in_array_name(raw_type_name<E>, is_scoped_enum<E>);
       constexpr auto enum_in_array_len  = enum_in_array_name.size();
       // Ubuntu Clang 20 complains about using local constexpr variables in a local struct
-      ReflectStringReturnValue<std::underlying_type_t<E>, ArraySize> ret;
+      ReflectStringReturnValue<enchantum::underlying_type_t<E>, ArraySize> ret;
 
       // ((anonymous namespace)::A)0
       // (anonymous namespace)::a

@@ -19,7 +19,7 @@ namespace details {
 
 template<typename E, typename Container = details::bitset<count<E>>>
 class bitset : public Container {
-  static_assert(std::is_enum_v<E>);
+  static_assert(enchantum::is_enum_v<E>);
 public:
 
   using container_type = Container;

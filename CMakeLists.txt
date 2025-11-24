@@ -14,7 +14,13 @@ file(GLOB_RECURSE INCS "${INCDIR}/*.hpp")
 
 add_library(enchantum INTERFACE ${INCS})
 add_library(enchantum::enchantum ALIAS enchantum)
-target_compile_features(enchantum INTERFACE cxx_std_17)
+
+# Support C++14 and later
+if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+    target_compile_features(enchantum INTERFACE cxx_std_14)
+else()
+    target_compile_features(enchantum INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+endif()
  
 target_include_directories(enchantum INTERFACE
     $<BUILD_INTERFACE:${INCDIR}>

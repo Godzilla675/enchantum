@@ -6,12 +6,23 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
  
-target_compile_features(Catch2 PRIVATE cxx_std_17)
+# Support C++14 and later
+if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+    target_compile_features(Catch2 PRIVATE cxx_std_14)
+else()
+    target_compile_features(Catch2 PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
+endif()
 target_compile_definitions(Catch2 PUBLIC CATCH_CONFIG_ENABLE_OPTIONAL_STRINGMAKER)
 add_executable(tests)
 
 target_include_directories(tests PRIVATE "third_party")
-target_compile_features(tests PRIVATE cxx_std_17)
+
+# Support C++14 and later
+if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+    target_compile_features(tests PRIVATE cxx_std_14)
+else()
+    target_compile_features(tests PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
+endif()
 
 
 target_link_libraries(tests PRIVATE enchantum::enchantum Catch2::Catch2WithMain)
@@ -63,7 +74,14 @@ target_sources(tests PRIVATE ${SRCS})
 
 
 add_executable(tests_config)
-target_compile_features(tests_config PRIVATE cxx_std_17)
+
+# Support C++14 and later
+if(NOT DEFINED CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 14)
+    target_compile_features(tests_config PRIVATE cxx_std_14)
+else()
+    target_compile_features(tests_config PRIVATE cxx_std_${CMAKE_CXX_STANDARD})
+endif()
+
 target_compile_definitions(tests_config PRIVATE ENCHANTUM_CONFIG_FILE="config_test/config.hpp")
 target_sources(tests_config PRIVATE config_test/config.cpp config_test/config.hpp)
 target_include_directories(tests_config PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})

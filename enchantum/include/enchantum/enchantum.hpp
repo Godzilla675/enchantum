@@ -62,9 +62,9 @@ namespace details {
 
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-[[nodiscard]] constexpr bool contains(const std::underlying_type_t<E> value) noexcept
+[[nodiscard]] constexpr bool contains(const enchantum::underlying_type_t<E> value) noexcept
 {
-  using T = std::underlying_type_t<E>;
+  using T = enchantum::underlying_type_t<E>;
 
   if (value < T(min<E>) || value > T(max<E>))
     return false;
@@ -89,7 +89,7 @@ template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
 [[nodiscard]] constexpr bool contains(const E value) noexcept
 {
-  return enchantum::contains<E>(static_cast<std::underlying_type_t<E>>(value));
+  return enchantum::contains<E>(static_cast<enchantum::underlying_type_t<E>>(value));
 }
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
@@ -131,7 +131,7 @@ namespace details {
     template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
     [[nodiscard]] constexpr optional<std::size_t> operator()(const E e) const noexcept
     {
-      using T = std::underlying_type_t<E>;
+      using T = enchantum::underlying_type_t<E>;
 
       if constexpr (is_contiguous<E>) {
         if (enchantum::contains(e)) {
@@ -162,7 +162,7 @@ namespace details {
 
   template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
   struct cast_functor {
-    [[nodiscard]] constexpr optional<E> operator()(const std::underlying_type_t<E> value) const noexcept
+    [[nodiscard]] constexpr optional<E> operator()(const enchantum::underlying_type_t<E> value) const noexcept
     {
       if (!enchantum::contains<E>(value))
         return optional<E>();
@@ -199,12 +199,12 @@ namespace details {
 } // namespace details
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr details::index_to_enum_functor<E> index_to_enum{};
+ENCHANTUM_INLINE_VAR constexpr details::index_to_enum_functor<E> index_to_enum{};
 
-inline constexpr details::enum_to_index_functor enum_to_index{};
+ENCHANTUM_INLINE_VAR constexpr details::enum_to_index_functor enum_to_index{};
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr details::cast_functor<E> cast{};
+ENCHANTUM_INLINE_VAR constexpr details::cast_functor<E> cast{};
 
 
 namespace details {
@@ -219,7 +219,7 @@ namespace details {
   };
 
 } // namespace details
-inline constexpr details::to_string_functor to_string{};
+ENCHANTUM_INLINE_VAR constexpr details::to_string_functor to_string{};
 
 
 } // namespace enchantum

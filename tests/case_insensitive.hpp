@@ -1,6 +1,6 @@
 #pragma once
 #include <cstddef>
-#include <string_view>
+#include <enchantum/details/string_view.hpp>
 
 struct CaseInsenitive {
 
@@ -11,10 +11,14 @@ struct CaseInsenitive {
   }
 };
 
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
 inline constexpr CaseInsenitive case_insensitive;
+#else
+static constexpr CaseInsenitive case_insensitive{};
+#endif
 
 struct CaseInsenitiveByStrings {
-  constexpr bool operator()(const std::string_view a, const std::string_view b) const
+  constexpr bool operator()(const enchantum::string_view a, const enchantum::string_view b) const
   {
     if (a.size() != b.size())
       return false;
@@ -26,7 +30,11 @@ struct CaseInsenitiveByStrings {
   }
 };
 
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
 inline constexpr CaseInsenitiveByStrings case_insensitive_by_strings;
+#else
+static constexpr CaseInsenitiveByStrings case_insensitive_by_strings{};
+#endif
 
 
 struct CaseInsenitiveBoth {
@@ -39,4 +47,8 @@ struct CaseInsenitiveBoth {
   }
 };
 
+#if __cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L)
 inline constexpr CaseInsenitiveBoth case_insensitive_both;
+#else
+static constexpr CaseInsenitiveBoth case_insensitive_both{};
+#endif

@@ -178,7 +178,7 @@ namespace details {
       using value_type = E;
       [[nodiscard]] constexpr E operator*() const noexcept
       {
-        using T = std::underlying_type_t<E>;
+        using T = enchantum::underlying_type_t<E>;
 
         if constexpr (is_contiguous<E>) {
           return static_cast<E>(static_cast<T>(min<E>) + static_cast<T>(this->index));
@@ -236,21 +236,21 @@ namespace details {
 } // namespace details
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr details::values_generator_t<E> values_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::values_generator_t<E> values_generator{};
 
 #ifdef __cpp_concepts
 template<Enum E, typename StringView = string_view, bool NullTerminated = true>
-inline constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
 
 template<Enum E, typename Pair = std::pair<E, string_view>, bool NullTerminated = true>
-inline constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
+ENCHANTUM_INLINE_VAR constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
 
 #else
-template<typename E, typename StringView = string_view, bool NullTerminated = true, std::enable_if_t<std::is_enum_v<E>, int> = 0>
-inline constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
+template<typename E, typename StringView = string_view, bool NullTerminated = true, std::enable_if_t<enchantum::is_enum_v<E>, int> = 0>
+ENCHANTUM_INLINE_VAR constexpr details::names_generator_t<E, StringView, NullTerminated> names_generator{};
 
-template<typename E, typename Pair = std::pair<E, string_view>, bool NullTerminated = true, std::enable_if_t<std::is_enum_v<E>, int> = 0>
-inline constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
+template<typename E, typename Pair = std::pair<E, string_view>, bool NullTerminated = true, std::enable_if_t<enchantum::is_enum_v<E>, int> = 0>
+ENCHANTUM_INLINE_VAR constexpr details::entries_generator_t<E, Pair, NullTerminated> entries_generator{};
 
 #endif
 

@@ -11,7 +11,7 @@ namespace details {
   {
     if constexpr (is_bitflag<E>) {
       if (const auto name = enchantum::to_string_bitflag(e); !name.empty()) {
-        if constexpr (std::is_same_v<std::string, string>) {
+        if constexpr (enchantum::is_same_v<std::string, string>) {
           return name;
         }
         else {

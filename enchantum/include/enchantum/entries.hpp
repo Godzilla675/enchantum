@@ -35,7 +35,7 @@ using ::std::to_underlying;
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
 [[nodiscard]] constexpr auto to_underlying(const E e) noexcept
 {
-  return static_cast<std::underlying_type_t<E>>(e);
+  return static_cast<enchantum::underlying_type_t<E>>(e);
 }
 #endif
 
@@ -80,16 +80,16 @@ namespace details {
                                                              sizeof(E),
                                                              Min,
                                                              Max,
-                                                             std::is_signed_v<std::underlying_type_t<E>>)>{});
+                                                             enchantum::is_signed_v<enchantum::underlying_type_t<E>>)>{});
 
 
   // Thanks https://en.cppreference.com/w/cpp/utility/intcmp.html
   template<typename T, typename U>
   constexpr bool cmp_less(const T t, const U u) noexcept
   {
-    if constexpr (std::is_signed_v<T> == std::is_signed_v<U>)
+    if constexpr (enchantum::is_signed_v<T> == enchantum::is_signed_v<U>)
       return t < u;
-    else if constexpr (std::is_signed_v<T>)
+    else if constexpr (enchantum::is_signed_v<T>)
       return t < 0 || std::make_unsigned_t<T>(t) < u;
     else
       return u >= 0 && t < std::make_unsigned_t<U>(u);
@@ -132,8 +132,8 @@ namespace details {
   #endif
       !details::has_specialized_traits<E>) {
       static_assert(elements.valid_count == reflection_data_impl<E, NullTerminated,
-        details::ClampToRange<std::underlying_type_t<E>>(enum_traits<E>::min * ENCHANTUM_CHECK_OUT_OF_BOUNDS_BY),
-        details::ClampToRange<std::underlying_type_t<E>>(enum_traits<E>::max * ENCHANTUM_CHECK_OUT_OF_BOUNDS_BY)
+        details::ClampToRange<enchantum::underlying_type_t<E>>(enum_traits<E>::min * ENCHANTUM_CHECK_OUT_OF_BOUNDS_BY),
+        details::ClampToRange<enchantum::underlying_type_t<E>>(enum_traits<E>::max * ENCHANTUM_CHECK_OUT_OF_BOUNDS_BY)
     >.elements.valid_count,
           "enchantum has detected that this enum is not fully reflected. Please look at https://github.com/ZXShady/enchantum/blob/main/docs/features.md#enchantum_check_out_of_bounds_by for more information");
     }
@@ -244,14 +244,14 @@ namespace details {
 } // namespace details
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr auto values = details::get_values<E>();
+ENCHANTUM_INLINE_VAR constexpr auto values = details::get_values<E>();
 
 #ifdef __cpp_concepts
 template<Enum E, typename String = string_view, bool NullTerminated = true>
 #else
-template<typename E, typename String = string_view, bool NullTerminated = true, std::enable_if_t<std::is_enum_v<E>, int> = 0>
+template<typename E, typename String = string_view, bool NullTerminated = true, std::enable_if_t<enchantum::is_enum_v<E>, int> = 0>
 #endif
-inline constexpr auto names = details::get_names<E, String, NullTerminated>();
+ENCHANTUM_INLINE_VAR constexpr auto names = details::get_names<E, String, NullTerminated>();
 
 
 #ifdef __cpp_concepts
@@ -260,43 +260,43 @@ template<Enum E, typename Pair = std::pair<E, enchantum::string_view>, bool Null
 template<typename E,
          typename Pair                            = std::pair<E, enchantum::string_view>,
          bool NullTerminated                      = true,
-         std::enable_if_t<std::is_enum_v<E>, int> = 0>
+         std::enable_if_t<enchantum::is_enum_v<E>, int> = 0>
 #endif
-inline constexpr auto entries = enchantum::details::get_entries<E, Pair, NullTerminated>();
+ENCHANTUM_INLINE_VAR constexpr auto entries = enchantum::details::get_entries<E, Pair, NullTerminated>();
 
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr auto min = values<E>.front();
+ENCHANTUM_INLINE_VAR constexpr auto min = values<E>.front();
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
-inline constexpr auto max = values<E>.back();
+ENCHANTUM_INLINE_VAR constexpr auto max = values<E>.back();
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
 inline constexpr std::size_t count = values<E>.size();
 
 
 template<typename E>
-inline constexpr bool has_zero_flag = [](const auto is_bitflag) {
+ENCHANTUM_INLINE_VAR constexpr bool has_zero_flag = [](const auto is_bitflag) {
   if constexpr (is_bitflag.value) {
     for (const auto v : values<E>)
-      if (static_cast<std::underlying_type_t<E>>(v) == 0)
+      if (static_cast<enchantum::underlying_type_t<E>>(v) == 0)
         return true;
   }
   return false;
 }(std::bool_constant<is_bitflag<E>>{});
 
 template<typename E>
-inline constexpr bool is_contiguous = static_cast<std::size_t>(
+ENCHANTUM_INLINE_VAR constexpr bool is_contiguous = static_cast<std::size_t>(
                                         enchantum::to_underlying(max<E>) - enchantum::to_underlying(min<E>)) +
     1 ==
   count<E>;
 
 
 template<typename E>
-inline constexpr bool is_contiguous_bitflag = [](const auto is_bitflag) {
+ENCHANTUM_INLINE_VAR constexpr bool is_contiguous_bitflag = [](const auto is_bitflag) {
   if constexpr (is_bitflag.value) {
     constexpr auto& enums = values<E>;
-    using T               = std::underlying_type_t<E>;
+    using T               = enchantum::underlying_type_t<E>;
     for (auto i = std::size_t{has_zero_flag<E>}; i < enums.size() - 1; ++i)
       if (T(enums[i]) << 1 != T(enums[i + 1]))
         return false;

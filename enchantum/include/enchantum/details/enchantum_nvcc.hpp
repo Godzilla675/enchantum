@@ -76,7 +76,7 @@ namespace details {
   constexpr auto reflect(std::index_sequence<Is...>) noexcept
   {
     using MinT = decltype(Min);
-    using T    = std::underlying_type_t<E>;
+    using T    = enchantum::underlying_type_t<E>;
 
     constexpr auto elements_local = []() {
       constexpr auto ArraySize = sizeof...(Is) + is_bitflag<E>;
@@ -87,7 +87,7 @@ namespace details {
         struct _ {};
         // using a pointer since C++17 only allows pointers to class types not the class types themselves
         constexpr _* A{};
-        using Underlying = std::make_unsigned_t<std::conditional_t<std::is_same_v<bool, T>, unsigned char, T>>;
+        using Underlying = std::make_unsigned_t<std::conditional_t<enchantum::is_same_v<bool, T>, unsigned char, T>>;
         // dummy 0
         if constexpr (always_true && is_bitflag<E>) // sizeof... to make contest dependant
           return details::var_name<A, static_cast<E>(!always_true), static_cast<E>(Underlying(1) << Is)..., 0>();
@@ -98,7 +98,7 @@ namespace details {
 
       constexpr auto enum_in_array_len = details::enum_in_array_name_size(raw_type_name<E>, is_scoped_enum<E>);
       // Ubuntu Clang 20 complains about using local constexpr variables in a local struct
-      ReflectStringReturnValue<std::underlying_type_t<E>, ArraySize> ret;
+      ReflectStringReturnValue<enchantum::underlying_type_t<E>, ArraySize> ret;
 
       // ((anonymous namespace)::A)0
       // (anonymous namespace)::a
