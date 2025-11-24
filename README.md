@@ -30,7 +30,7 @@ enchantum::optional<Color> c = enchantum::cast<Color>("Green");  // Works!
 ```
 
 ### Note
-While you can write C++14 code that uses enchantum, the library headers themselves use C++17 features internally. This is transparent to users - simply ensure your compiler supports C++17 (which all supported compilers do). The library automatically provides C++14-compatible types in its public API.
+While you can write C++14 code that uses enchantum, the library headers themselves use C++17 features internally (specifically `template<auto>` non-type template parameters). However, you do **not** need to compile your code with `-std=c++17`—as long as your compiler is new enough to support these C++17 features internally (GCC 9+, Clang 8+, MSVC 19.24+), you can use enchantum in C++14 mode. The library automatically provides C++14-compatible types in its public API.
 
 Key Features
 

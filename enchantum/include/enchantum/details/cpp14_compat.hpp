@@ -248,14 +248,8 @@ constexpr bool is_invocable_v = is_invocable<F, Args...>::value;
 #if ENCHANTUM_HAS_CPP17
   #define ENCHANTUM_IF_CONSTEXPR if constexpr
   #define ENCHANTUM_INLINE_VAR inline
-  // For C++17: template<auto V> becomes template<ENCHANTUM_AUTO_NTTP(V)>
-  #define ENCHANTUM_AUTO_NTTP(name) auto name
-  #define ENCHANTUM_AUTO_NTTP_PACK(name) auto... name
 #else
   #define ENCHANTUM_IF_CONSTEXPR if
   #define ENCHANTUM_INLINE_VAR
-  // For C++14: template<auto V> becomes template<typename ENCHANTUM_AUTO_NTTP_TYPE_##V, ENCHANTUM_AUTO_NTTP_TYPE_##V V>
-  // This is too complex to macro-ize cleanly, so we'll need manual conversion
-  #define ENCHANTUM_AUTO_NTTP(name) typename ENCHANTUM_AUTO_NTTP_TYPE_##name, ENCHANTUM_AUTO_NTTP_TYPE_##name name
-  #define ENCHANTUM_AUTO_NTTP_PACK(name) typename... ENCHANTUM_AUTO_NTTP_TYPES_##name, ENCHANTUM_AUTO_NTTP_TYPES_##name... name
+  // For C++14: template<auto V> is not supported; manual conversion is required.
 #endif
