@@ -1,0 +1,5 @@
+if(EXISTS "/home/runner/work/enchantum/enchantum/build-cpp14-test/tests/tests_config-b12d07c_tests.cmake")
+  include("/home/runner/work/enchantum/enchantum/build-cpp14-test/tests/tests_config-b12d07c_tests.cmake")
+else()
+  add_test(tests_config_NOT_BUILT-b12d07c tests_config_NOT_BUILT-b12d07c)
+endif()
