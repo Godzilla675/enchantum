@@ -24,6 +24,9 @@ cmake_install.cmake
 .cache/
 *.TMP
 
+# CodeQL
+_codeql_*
+
 Testing
 Debug/
 build/
