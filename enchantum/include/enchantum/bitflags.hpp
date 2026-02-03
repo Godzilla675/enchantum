@@ -78,8 +78,23 @@ template<typename String = string, ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
     if (static_cast<T>(value) == 0)
       return String(names_generator<E>[0]);
 
+  std::size_t size        = 0;
+  T           check_value = 0;
+  for (auto i = std::size_t{has_zero_flag<E>}; i < count<E>; ++i) {
+    const auto v = static_cast<T>(values_generator<E>[i]);
+    if (v == (static_cast<T>(value) & v)) {
+      if (size != 0)
+        ++size; // append separator if not the first value
+      size += names_generator<E>[i].size();
+      check_value |= v;
+    }
+  }
+
+  if (check_value != static_cast<T>(value))
+    return String();
+
   String name;
-  T      check_value = 0;
+  name.reserve(size);
   for (auto i = std::size_t{has_zero_flag<E>}; i < count<E>; ++i) {
     const auto v = static_cast<T>(values_generator<E>[i]);
     if (v == (static_cast<T>(value) & v)) {
@@ -87,12 +102,9 @@ template<typename String = string, ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
       if (!name.empty())
         name.append(1, sep);           // append separator if not the first value
       name.append(s.data(), s.size()); // not using operator += since this may not be std::string_view always
-      check_value |= v;
     }
   }
-  if (check_value == static_cast<T>(value))
-    return name;
-  return String();
+  return name;
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
