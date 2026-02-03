@@ -2,7 +2,6 @@
 #include <catch2/catch_test_macros.hpp>
 #include <enchantum/enchantum.hpp>
 
-#ifdef __cpp_concepts
 TEST_CASE("Concept checks", "[concepts]")
 {
   SECTION("Enum concept check")
@@ -73,4 +72,3 @@ TEST_CASE("Concept checks", "[concepts]")
     STATIC_CHECK(enchantum::BitFlagEnum<Flags>);
   }
 }
-#endif
