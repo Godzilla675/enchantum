@@ -113,3 +113,12 @@ TEST_CASE("scoped::to_string_bitflag")
   CHECK(enchantum::scoped::to_string_bitflag(enchantum::value_ors<Flags>, ',') ==
         "Flags::Flag0,Flags::Flag1,Flags::Flag2,Flags::Flag3,Flags::Flag4,Flags::Flag5,Flags::Flag6");
 }
+
+TEST_CASE("scoped cast and contains with non-copyable predicate")
+{
+  const NonCopyableCaseInsensitive pred{};
+  CHECK(enchantum::scoped::contains<Color>("Color::gReEn", pred));
+  CHECK(enchantum::scoped::cast<Color>("Color::aQuA", pred) == Color::Aqua);
+  CHECK(enchantum::scoped::cast_bitflag<Flags>("Flags::fLaG0|Flags::fLaG1", '|', pred) == (Flags::Flag0 | Flags::Flag1));
+  CHECK(enchantum::scoped::contains_bitflag<Flags>("Flags::fLaG0|Flags::fLaG1", '|', pred));
+}

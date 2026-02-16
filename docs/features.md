@@ -391,7 +391,7 @@ When a function takes an argument named `BinaryPredicate`.
 it must be 
 
 1. Side effect free
-2. Copyable
+2. Can be passed as a const reference (it does not need to be copyable).
 3. Callable with atleast `(char,char)` or `(std::string_view,std::string_view)`.
 4. Must be callable while being `const`
 
@@ -510,7 +510,7 @@ namespace details
   constexpr std::optional<E> operator()(std::string_view name) noexcept;
 
   template<typename BinaryPredicate>
-  constexpr std::optional<E> operator()(std::string_view name, BinaryPredicate binary_predicate) const noexcept
+  constexpr std::optional<E> operator()(std::string_view name, const BinaryPredicate& binary_predicate) const noexcept
   };
 }
 
@@ -555,7 +555,7 @@ assert(enchantum::cast<Status>("UnKnOwn",[](std::string_view a,std::string_view 
 // defined in header bitflags.hpp
 
 template<BitFlagEnum E, typename BinaryPredicate>
-constexpr std::optional<E> cast_bitflag(std::string_view name, char sep, BinaryPredicate binary_pred) noexcept;
+constexpr std::optional<E> cast_bitflag(std::string_view name, char sep, const BinaryPredicate& binary_pred) noexcept;
 
 template<BitFlagEnum E>
 constexpr std::optional<E> cast_bitflag(std::string_view name, char sep = '|') noexcept;
@@ -963,7 +963,7 @@ template<Enum E>
 constexpr bool contains(std::string_view name) noexcept;
 
 template<Enum E, typename BinaryPredicate>
-constexpr bool contains(std::string_view name, BinaryPredicate binary_predicate) noexcept;
+constexpr bool contains(std::string_view name, const BinaryPredicate& binary_predicate) noexcept;
 
 ```
 
@@ -972,6 +972,7 @@ constexpr bool contains(std::string_view name, BinaryPredicate binary_predicate)
 
 **Notes**:
   Additional overloads may be provided to optimize for specific properties (e.g enums with no gaps can compare against `min<E>` and `max<E>`)
+  For non-contiguous enums, underlying value checks are done using binary search on sorted reflected values.
 
 - **Parameters**:
   - `value`: The enum value or underlying integer value to check.
@@ -1006,7 +1007,7 @@ template<BitFlagEnum E>
 constexpr bool contains_bitflag(std::string_view name,char sep = '|') noexcept;
 
 template<BitFlagEnum E, typename BinaryPredicate>
-constexpr bool contains_bitflag(std::string_view s, char sep, BinaryPredicate binary_pred) noexcept;
+constexpr bool contains_bitflag(std::string_view s, char sep, const BinaryPredicate& binary_pred) noexcept;
 
 ```
 
@@ -1087,7 +1088,7 @@ namespace details {
     constexpr std::optional<E> operator()(std::string_view name) const noexcept;
 
     template<typename BinaryPredicate>
-    constexpr std::optional<E> operator(std::string_view name, BinaryPredicate binary_predicate)() const noexcept;
+    constexpr std::optional<E> operator()(std::string_view name, const BinaryPredicate& binary_predicate) const noexcept;
   };
 }
 
@@ -1100,20 +1101,20 @@ template<Enum E>
 constexpr bool contains(std::string_view name) noexcept;
 
 template<Enum E, typename BinaryPredicate>
-constexpr bool contains(std::string_view name, BinaryPredicate binary_predicate) noexcept;
+constexpr bool contains(std::string_view name, const BinaryPredicate& binary_predicate) noexcept;
 
 
 template<BitFlagEnum E>
 string to_string_bitflag(E value, char sep = '|');
 
 template<BitFlagEnum E, typename BinaryPredicate>
-constexpr std::optional<E> cast_bitflag(std::string_view s, char sep, BinaryPredicate binary_pred) noexcept;
+constexpr std::optional<E> cast_bitflag(std::string_view s, char sep, const BinaryPredicate& binary_pred) noexcept;
 
 template<BitFlagEnum E>
 constexpr std::optional<E> cast_bitflag(std::string_view s, char sep = '|') noexcept;
 
 template<BitFlagEnum E, typename BinaryPredicate>
-constexpr bool contains_bitflag(std::string_view s, char sep, BinaryPredicate binary_pred) noexcept;
+constexpr bool contains_bitflag(std::string_view s, char sep, const BinaryPredicate& binary_pred) noexcept;
 
 template<BitFlagEnum E>
 constexpr bool contains_bitflag(std::string_view s, char sep = '|') noexcept;
@@ -1203,6 +1204,9 @@ constexpr inline details::ENUM_TO_INDEX_FUNCTOR enum_to_index;
 
 - **Description**:  
   Converts an enum to its corresponding index value.
+
+- **Notes**:
+  For non-contiguous enums, lookup is performed with binary search on reflected values.
 
 - **Parameters**:
   - `value`: The enum to convert to an index value.

@@ -89,6 +89,14 @@ TEST_CASE("cast cast_bitflags", "[casts][bitflags]")
   STATIC_CHECK(enchantum::cast<Level>("NoLevel").has_value());
 }
 
+TEST_CASE("cast and contains_bitflag with non-copyable predicate", "[casts][contains][bitflags]")
+{
+  const NonCopyableCaseInsensitive pred{};
+  CHECK(enchantum::cast<EntityStatus>("pending", pred) == EntityStatus::Pending);
+  CHECK(enchantum::cast_bitflag<EntityStatus>("peNdIng|AcTive", '|', pred).has_value());
+  CHECK(enchantum::contains_bitflag<EntityStatus>("peNdIng|AcTive", '|', pred));
+}
+
 TEST_CASE("invalid_casts", "[cast][bitflags]")
 {
   SECTION("Invalid strings for enum cast")

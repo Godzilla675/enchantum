@@ -446,6 +446,20 @@ TEST_CASE("Color enum cast from underlying type", "[cast]")
   STATIC_CHECK_FALSE(enchantum::cast<Color>(T(2138)));
 }
 
+TEST_CASE("Color enum non-contiguous value lookups", "[contains][enum_to_index]")
+{
+  using T = std::underlying_type_t<Color>;
+  STATIC_CHECK(enchantum::contains<Color>(T(Color::Aqua)));
+  STATIC_CHECK(enchantum::contains<Color>(T(Color::Green)));
+  STATIC_CHECK_FALSE(enchantum::contains<Color>(T(-41)));
+  STATIC_CHECK_FALSE(enchantum::contains<Color>(T(200)));
+
+  STATIC_CHECK(enchantum::enum_to_index(Color::Aqua) == std::size_t(0));
+  STATIC_CHECK(enchantum::enum_to_index(Color::Green) == std::size_t(2));
+  STATIC_CHECK_FALSE(enchantum::enum_to_index(static_cast<Color>(T(-41))).has_value());
+  STATIC_CHECK_FALSE(enchantum::enum_to_index(static_cast<Color>(T(200))).has_value());
+}
+
 TEST_CASE("NonContigFlagsWithNoneCStyle contains", "[contains]")
 {
   STATIC_CHECK_FALSE(enchantum::contains(NonContigFlagsWithNoneCStyle(1 << 3)));
@@ -490,6 +504,13 @@ TEST_CASE("Color enum cast with custom binary predicate (case insensitive)", "[c
   STATIC_CHECK(enchantum::cast<Color>("purple", case_insensitive_both) == Color::Purple);
   STATIC_CHECK(enchantum::cast<Color>("AQUA", case_insensitive_both) == Color::Aqua);
   STATIC_CHECK_FALSE(enchantum::cast<Color>("zxSHADY", case_insensitive_both));
+}
+
+TEST_CASE("Color enum cast and contains with non-copyable predicate", "[cast][contains]")
+{
+  const NonCopyableCaseInsensitive pred{};
+  CHECK(enchantum::contains<Color>("grEeN", pred));
+  CHECK(enchantum::cast<Color>("aQuA", pred) == Color::Aqua);
 }
 
 TEST_CASE("Color enum index_to_enum", "[index_to_enum]")

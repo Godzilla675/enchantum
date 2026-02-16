@@ -40,7 +40,7 @@ namespace scoped {
   }
 
   template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E), typename BinaryPredicate>
-  [[nodiscard]] constexpr bool contains(const string_view name, const BinaryPredicate binary_predicate) noexcept
+  [[nodiscard]] constexpr bool contains(const string_view name, const BinaryPredicate& binary_predicate) noexcept
   {
     const auto n = details::remove_scope_or_empty(name, type_name<E>);
     return !n.empty() && enchantum::contains<E>(n, binary_predicate);
@@ -56,7 +56,7 @@ namespace scoped {
       }
 
       template<typename BinaryPred>
-      [[nodiscard]] constexpr optional<E> operator()(const string_view name, const BinaryPred binary_predicate) const noexcept
+      [[nodiscard]] constexpr optional<E> operator()(const string_view name, const BinaryPred& binary_predicate) const noexcept
       {
         const auto n = details::remove_scope_or_empty(name, type_name<E>);
         return n.empty() ? optional<E>() : cast<E>(n, binary_predicate);
@@ -87,7 +87,7 @@ namespace scoped {
   inline constexpr details::scoped_cast_functor<E> cast;
 
   template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-  [[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+  [[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred& binary_pred) noexcept
   {
     std::size_t pos = 0;
     for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
@@ -141,7 +141,7 @@ namespace scoped {
 
 
   template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-  [[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+  [[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred& binary_pred) noexcept
   {
     using T = std::underlying_type_t<E>;
     T           check_value{};

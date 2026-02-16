@@ -40,3 +40,13 @@ struct CaseInsenitiveBoth {
 };
 
 inline constexpr CaseInsenitiveBoth case_insensitive_both;
+
+struct NonCopyableCaseInsensitive {
+  NonCopyableCaseInsensitive()                                  = default;
+  NonCopyableCaseInsensitive(const NonCopyableCaseInsensitive&) = delete;
+  NonCopyableCaseInsensitive(NonCopyableCaseInsensitive&&)      = delete;
+  NonCopyableCaseInsensitive& operator=(const NonCopyableCaseInsensitive&) = delete;
+  NonCopyableCaseInsensitive& operator=(NonCopyableCaseInsensitive&&) = delete;
+
+  constexpr bool operator()(const char a, const char b) const { return case_insensitive(a, b); }
+};

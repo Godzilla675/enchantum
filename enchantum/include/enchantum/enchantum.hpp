@@ -23,7 +23,7 @@ namespace enchantum {
 
 namespace details {
   template<typename BinaryPredicate>
-  constexpr bool call_predicate(const BinaryPredicate binary_pred, const string_view a, const string_view b)
+  constexpr bool call_predicate(const BinaryPredicate& binary_pred, const string_view a, const string_view b)
   {
     if constexpr (std::is_invocable_v<const BinaryPredicate&, const char&, const char&>) {
       const auto a_size = a.size();
@@ -57,6 +57,26 @@ namespace details {
     return minmax;
   }
 
+  template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
+  [[nodiscard]] constexpr optional<std::size_t> find_enum_index_by_value(const std::underlying_type_t<E> value) noexcept
+  {
+    using T = std::underlying_type_t<E>;
+
+    std::size_t first = 0;
+    std::size_t last  = count<E>;
+    while (first < last) {
+      const auto mid       = first + (last - first) / 2;
+      const auto mid_value = static_cast<T>(values_generator<E>[mid]);
+      if (mid_value < value)
+        first = mid + 1;
+      else
+        last = mid;
+    }
+    if (first < count<E> && static_cast<T>(values_generator<E>[first]) == value)
+      return optional<std::size_t>(first);
+    return optional<std::size_t>();
+  }
+
 } // namespace details
 
 
@@ -81,10 +101,7 @@ template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
     return true;
   }
   else {
-    for (const auto v : values_generator<E>)
-      if (static_cast<T>(v) == value)
-        return true;
-    return false;
+    return details::find_enum_index_by_value<E>(value).has_value();
   }
 }
 
@@ -109,7 +126,7 @@ template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
 
 
 template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E), typename BinaryPred>
-[[nodiscard]] constexpr bool contains(const string_view name, const BinaryPred binary_pred) noexcept
+[[nodiscard]] constexpr bool contains(const string_view name, const BinaryPred& binary_pred) noexcept
 {
   for (const auto s : names_generator<E>)
     if (details::call_predicate(binary_pred, name, s))
@@ -153,10 +170,7 @@ namespace details {
         }
       }
       else {
-        for (std::size_t i = 0; i < count<E>; ++i) {
-          if (values_generator<E>[i] == e)
-            return optional<std::size_t>(i);
-        }
+        return details::find_enum_index_by_value<E>(static_cast<T>(e));
       }
       return optional<std::size_t>();
     }
@@ -187,7 +201,7 @@ namespace details {
     }
 
     template<typename BinaryPred>
-    [[nodiscard]] constexpr optional<E> operator()(const string_view name, const BinaryPred binary_pred) const noexcept
+    [[nodiscard]] constexpr optional<E> operator()(const string_view name, const BinaryPred& binary_pred) const noexcept
     {
 
       for (std::size_t i = 0; i < count<E>; ++i) {

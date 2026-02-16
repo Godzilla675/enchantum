@@ -45,7 +45,7 @@ template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-[[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+[[nodiscard]] constexpr bool contains_bitflag(const string_view s, const char sep, const BinaryPred& binary_pred) noexcept
 {
   std::size_t pos = 0;
   for (std::size_t i = s.find(sep); i != s.npos; i = s.find(sep, pos)) {
@@ -96,7 +96,7 @@ template<typename String = string, ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E)>
 }
 
 template<ENCHANTUM_DETAILS_ENUM_BITFLAG_CONCEPT(E), typename BinaryPred>
-[[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred binary_pred) noexcept
+[[nodiscard]] constexpr optional<E> cast_bitflag(const string_view s, const char sep, const BinaryPred& binary_pred) noexcept
 {
   using T = std::underlying_type_t<E>;
   T           check_value{};
