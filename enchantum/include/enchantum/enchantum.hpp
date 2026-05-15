@@ -1,18 +1,18 @@
 #pragma once
 
 // IWYU pragma: begin_exports
-#include "common.hpp" // IWYU pragma: export
-#include "details/optional.hpp" // IWYU pragma: export
+#include "common.hpp"              // IWYU pragma: export
+#include "details/optional.hpp"    // IWYU pragma: export
 #include "details/string_view.hpp" // IWYU pragma: export
-#include "entries.hpp" // IWYU pragma: export
-#include "generators.hpp" // IWYU pragma: export
-#include "type_name.hpp" // IWYU pragma: export
+#include "entries.hpp"             // IWYU pragma: export
+#include "generators.hpp"          // IWYU pragma: export
+#include "type_name.hpp"           // IWYU pragma: export
 // IWYU pragma: end_exports
 
 #include <type_traits>
 #include <utility>
 
-#if defined(ENCAHNTUM_DETAILS_GCC_MAJOR) && ENCAHNTUM_DETAILS_GCC_MAJOR <= 10
+#if defined(ENCHANTUM_DETAILS_GCC_MAJOR) && ENCHANTUM_DETAILS_GCC_MAJOR <= 10
   #pragma GCC diagnostic push
   #pragma GCC diagnostic ignored "-Wconversion"
   #pragma GCC diagnostic ignored "-Wmaybe-uninitialized"
@@ -64,9 +64,9 @@ template<ENCHANTUM_DETAILS_ENUM_CONCEPT(E)>
 [[nodiscard]] constexpr bool contains(const std::underlying_type_t<E> value) noexcept
 {
   using T = std::underlying_type_t<E>;
-
-  if (value < T(min<E>) || value > T(max<E>))
-    return false;
+  if constexpr (count<E> != 0)
+    if (value < T(min<E>) || value > T(max<E>))
+      return false;
 
   if constexpr (is_contiguous_bitflag<E>) {
     if constexpr (has_zero_flag<E>)
@@ -135,7 +135,7 @@ namespace details {
     {
       using T = std::underlying_type_t<E>;
 
-      if constexpr (is_contiguous<E>) {
+      if constexpr (is_contiguous<E> && count<E> != 0) {
         if (enchantum::contains(e)) {
           return optional<std::size_t>(std::size_t(T(e) - T(min<E>)));
         }
@@ -228,6 +228,6 @@ inline constexpr details::to_string_functor to_string{};
 } // namespace enchantum
 
 
-#if defined(ENCAHNTUM_DETAILS_GCC_MAJOR) && ENCAHNTUM_DETAILS_GCC_MAJOR <= 10
+#if defined(ENCHANTUM_DETAILS_GCC_MAJOR) && ENCHANTUM_DETAILS_GCC_MAJOR <= 10
   #pragma GCC diagnostic pop
 #endif

@@ -26,9 +26,9 @@ Key Features
        -  `string <=> enum` conversions
        -  `enum <=> index` conversions
        -  enum validation functions like `cast` and `contains`
-       -  enum aware containers: `enchantum::bitset` and `enchantum::array`
+       -  enum aware containers adaptors like `enchantum::bitset` and `enchantum::array`
   - Extra features like:
-      - Scoped Functions
+      - Functions that output enums with their scope
       - Optional null terminator disabling
       - Optional prefix stripping for C-style enums
       - `0` values are reflected for bitflag enums 
@@ -54,8 +54,9 @@ Compiler Support: (Look at [CI](https://github.com/ZXShady/enchantum/actions))
   - GCC >= 9 
   - Clang >= 8
   - MSVC >= 19.24 VS16.4 (lower verions tested through godbolt)
+  - Resharper >= 2023
 
-Tested through basic tests on godbolt since I could not install it on CI
+Tested through basic tests on godbolt since I could not install it on CI, so support for them may not be the best.
   - ICX >= 2021.1.2 (Tested through godbolt [test link](https://godbolt.org/z/5naTha56K))
   - NVC++ >= 22.7 (minimum on godbolt [test link](https://godbolt.org/z/xr7xr6Y6v))
 
@@ -259,20 +260,20 @@ Conjure enum was compiled with `FIX8_CONJURE_ENUM_MINIMAL` macro defined.
 
 | Compiler    | Test Case   | `enchantum`     | `magic_enum` | `simple_enum` | `conjure_enum` |
 |-------------|-------------|-----------------|--------------|---------------|----------------|
-| **GCC**     | Small       | **6.0**  (9.3)  |  47          | 21.5          | 97.1           |
-|             | Big         | **2.7**  (4.6)  |  21          | 6.3           | 81.7           |
-|             | Large Range | **15.9** (45.1) |  Timeout     | 313           | Unknown        |
-|             | Ideal Range | 3        (4.2)  |  8.1         | **2.7**       | 46.8           |
+| **GCC**     | Small       | **6.0**  (8.2)  |  47          | 21.5          | 97.1           |
+|             | Big         | **2.7**  (3.3)  |  21          | 6.3           | 81.7           |
+|             | Large Range | **15.9** (34.1) |  Timeout     | 313           | Unknown        |
+|             | Ideal Range | 3        (3.5)  |  8.1         | **2.7**       | 46.8           |
 |                                                                            |                |
-| **Clang**   | Small       | **5.8**  (8.7)  |  47          | 14            | 66.8           |
-|             | Big         | **2.3**  (3.6)  |  18          | 4.4           | 52.9           |
-|             | Large Range | **15.1** (36.6) |  Timeout     | 96.3          | Timeout        |
-|             | Ideal Range | 2.9      (3.5)  |  8.7         | **2.3**       | 32             |
+| **Clang**   | Small       | **5.8**  (8.3)  |  47          | 14            | 66.8           |
+|             | Big         | **2.3**  (3.1)  |  18          | 4.4           | 52.9           |
+|             | Large Range | **15.1** (26.7) |  Timeout     | 96.3          | Timeout        |
+|             | Ideal Range | 2.9      (3.8)  |  8.7         | **2.3**       | 32             |
 |                                                                                             |
-| **MSVC**    | Small       | **15.8** (50.7) |  80          | 186           | ERROR          |
-|             | Big         | **8.8**  (13.6) |  37          | 32.1          | 244.9          |
-|             | Large Range | **85.3** (265.1)|  Timeout     | Timeout       | Timeout        |
-|             | Ideal Range | 5.8      (18.1) |  17.9        | **4.7**       | 95.7           |
+| **MSVC**    | Small       | **15.8** (37.4) |  80          | 186           | ERROR          |
+|             | Big         | **8.8**  (10.3) |  37          | 32.1          | 244.9          |
+|             | Large Range | **85.3** (111.4)|  Timeout     | Timeout       | Timeout        |
+|             | Ideal Range | 5.8      (16)   |  17.9        | **4.7**       | 95.7           |
 
 `conjure_enum` in "Small" test case caused the compiler to emit
 
