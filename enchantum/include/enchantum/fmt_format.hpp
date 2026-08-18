@@ -1,7 +1,7 @@
 #pragma once
 
-#include "bitflags.hpp"
 #include "details/format_util.hpp"
+#include "details/string_view.hpp"
 #include "enchantum.hpp"
 #include <fmt/format.h>
 
@@ -12,10 +12,10 @@ struct fmt::formatter<E>
 template<typename E>
 struct fmt::formatter<E, char, std::enable_if_t<std::is_enum_v<E>>>
 #endif
-: fmt::formatter<string_view> {
+: fmt::formatter< ::enchantum::string_view> {
   template<typename FmtContext>
   constexpr auto format(const E e, FmtContext& ctx) const
   {
-    return fmt::formatter<string_view>::format(enchantum::details::format(e), ctx);
+    return fmt::formatter< ::enchantum::string_view>::format(enchantum::details::format(e), ctx);
   }
 };

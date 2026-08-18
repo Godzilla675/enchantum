@@ -18,15 +18,11 @@
 namespace enchantum {
 namespace details {
 
-  struct senitiel {};
-
-
   template<typename CRTP, std::ptrdiff_t Size>
   struct sized_iterator {
     static_assert(Size < INT16_MAX, "Too many enum entries");
-  private:
-    using IndexType = std::conditional_t<(Size <= INT8_MAX), std::int8_t, std::int16_t>;
   public:
+    using IndexType = std::conditional_t<(Size <= INT8_MAX), std::int8_t, std::int16_t>;
     IndexType       index{};
     constexpr CRTP& operator+=(const std::ptrdiff_t offset) & noexcept
     {
@@ -86,67 +82,25 @@ namespace details {
       return index - that.index;
     }
 
-    [[nodiscard]] constexpr std::ptrdiff_t        operator-(senitiel) const noexcept { return index - Size; }
-    [[nodiscard]] friend constexpr std::ptrdiff_t operator-(senitiel, sized_iterator it) noexcept
-    {
-      return Size - it.index;
-    }
-
-    [[nodiscard]] constexpr bool operator==(const sized_iterator that) const noexcept { return that.index == index; };
-    [[nodiscard]] constexpr bool operator==(senitiel) const noexcept { return Size == index; }
+    [[nodiscard]] constexpr bool operator==(const sized_iterator that) const noexcept { return that.index == index; }
 
 #ifdef __cpp_impl_three_way_comparison
-    [[nodiscard]] constexpr auto operator<=>(const sized_iterator that) const noexcept { return index <=> that.index; };
-    [[nodiscard]] constexpr auto operator<=>(senitiel) const noexcept { return index <=> Size; }
+    [[nodiscard]] constexpr auto operator<=>(const sized_iterator that) const noexcept { return index <=> that.index; }
 #else
 
-    [[nodiscard]] constexpr bool operator!=(const sized_iterator that) const noexcept { return that.index != index; };
-    [[nodiscard]] constexpr bool operator!=(senitiel) const noexcept { return Size != index; }
-
-    [[nodiscard]] friend constexpr bool operator==(senitiel, const sized_iterator it) noexcept
-    {
-      return Size == it.index;
-    }
-
-
-    [[nodiscard]] friend constexpr bool operator!=(senitiel, const sized_iterator it) noexcept
-    {
-      return Size != it.index;
-    }
-
+    [[nodiscard]] constexpr bool operator!=(const sized_iterator that) const noexcept { return that.index != index; }
 
     [[nodiscard]] constexpr bool operator<(const sized_iterator that) const noexcept { return index < that.index; };
     [[nodiscard]] constexpr bool operator>(const sized_iterator that) const noexcept { return index > that.index; };
     [[nodiscard]] constexpr bool operator<=(const sized_iterator that) const noexcept { return index <= that.index; };
     [[nodiscard]] constexpr bool operator>=(const sized_iterator that) const noexcept { return index >= that.index; };
 
-    [[nodiscard]] constexpr bool operator<(senitiel) const noexcept { return index < Size; };
-    [[nodiscard]] constexpr bool operator>(senitiel) const noexcept { return index > Size; };
-    [[nodiscard]] constexpr bool operator<=(senitiel) const noexcept { return index <= Size; };
-    [[nodiscard]] constexpr bool operator>=(senitiel) const noexcept { return index >= Size; };
-
-    [[nodiscard]] friend constexpr bool operator<(senitiel, const sized_iterator it) noexcept
-    {
-      return Size < it.index;
-    };
-    [[nodiscard]] friend constexpr bool operator>(senitiel, const sized_iterator it) noexcept
-    {
-      return Size > it.index;
-    };
-    [[nodiscard]] friend constexpr bool operator<=(senitiel, const sized_iterator it) noexcept
-    {
-      return Size <= it.index;
-    };
-    [[nodiscard]] friend constexpr bool operator>=(senitiel, const sized_iterator it) noexcept
-    {
-      return Size >= it.index;
-    };
-
 #endif
   };
 
   template<typename E, typename String = string_view, bool NullTerminated = true>
   struct names_generator_t {
+    using value_type = String;
     [[nodiscard]] static constexpr std::size_t size() noexcept { return count<E>; }
 
     struct iterator : sized_iterator<iterator, static_cast<std::ptrdiff_t>(size())> {
@@ -162,7 +116,7 @@ namespace details {
     };
 
     [[nodiscard]] static constexpr auto begin() { return iterator{}; }
-    [[nodiscard]] static constexpr auto end() { return senitiel{}; }
+    [[nodiscard]] static constexpr auto end() { return iterator{{static_cast<typename iterator::IndexType>(size())}}; }
 
     [[nodiscard]] constexpr auto operator[](const std::size_t i) const noexcept
     {
@@ -173,6 +127,7 @@ namespace details {
   template<typename E>
   struct values_generator_t {
     [[nodiscard]] static constexpr std::size_t size() noexcept { return count<E>; }
+    using value_type = E;
 
     struct iterator : sized_iterator<iterator, static_cast<std::ptrdiff_t>(size())> {
       using value_type = E;
@@ -200,7 +155,7 @@ namespace details {
     };
 
     [[nodiscard]] static constexpr auto begin() { return iterator{}; }
-    [[nodiscard]] static constexpr auto end() { return senitiel{}; }
+    [[nodiscard]] static constexpr auto end() { return iterator{{static_cast<typename iterator::IndexType>(size())}}; }
 
     [[nodiscard]] constexpr auto operator[](const std::size_t i) const noexcept
     {
@@ -210,6 +165,8 @@ namespace details {
 
   template<typename E, typename Pair = std::pair<E, string_view>, bool NullTerminated = true>
   struct entries_generator_t {
+    using value_type = Pair;
+
     [[nodiscard]] static constexpr std::size_t size() noexcept { return count<E>; }
 
     struct iterator : sized_iterator<iterator, static_cast<std::ptrdiff_t>(size())> {
@@ -225,7 +182,7 @@ namespace details {
     };
 
     [[nodiscard]] static constexpr auto begin() { return iterator{}; }
-    [[nodiscard]] static constexpr auto end() { return senitiel{}; }
+    [[nodiscard]] static constexpr auto end() { return iterator{{static_cast<typename iterator::IndexType>(size())}}; }
 
     [[nodiscard]] constexpr auto operator[](const std::size_t i) const noexcept
     {

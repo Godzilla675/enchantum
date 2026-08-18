@@ -4,6 +4,9 @@
 #include <cstddef>
 #include <enchantum/generators.hpp>
 #ifdef __cpp_concepts
+  #if defined(__has_include) && __has_include(<ranges>)
+    #include <ranges>
+  #endif
   #include <concepts>
 #endif
 namespace {
@@ -32,20 +35,22 @@ enum class A {
   c
 };
 
-using entries          = decltype(enchantum::entries_generator<A>.begin());
-using values           = decltype(enchantum::values_generator<A>.begin());
-using names            = decltype(enchantum::names_generator<A>.begin());
-using entries_senitiel = decltype(enchantum::entries_generator<A>.end());
-using values_senitiel  = decltype(enchantum::values_generator<A>.end());
-using names_senitiel   = decltype(enchantum::names_generator<A>.end());
+using entries = decltype(enchantum::entries_generator<A>);
+using values  = decltype(enchantum::values_generator<A>);
+using names   = decltype(enchantum::names_generator<A>);
 
-using AllIterators = type_list<std::pair<entries, entries_senitiel>, std::pair<values, values_senitiel>, std::pair<names, names_senitiel>
->;
+using AllGenerators = type_list<entries, values, names>;
 
-TEMPLATE_LIST_TEST_CASE("generator iterators", "[generators][iterators]", AllIterators)
+TEMPLATE_LIST_TEST_CASE("generator iterators", "[generators]", AllGenerators)
 {
-  using iterator = typename TestType::first_type;
-  using senitiel = typename TestType::second_type;
+  auto begin = TestType{}.begin();
+  auto end   = TestType{}.end();
+
+  using iterator = decltype(begin);
+  using senitiel = decltype(end);
+#if defined(__cpp_concepts) && defined(__has_include) && __has_include(<ranges>)
+  STATIC_CHECK(std::ranges::random_access_range<TestType>);
+#endif
 
   SECTION("comparable")
   {
@@ -65,6 +70,7 @@ TEMPLATE_LIST_TEST_CASE("generator iterators", "[generators][iterators]", AllIte
     STATIC_CHECK(is_greater_comparable<iterator, senitiel>);
     STATIC_CHECK(is_less_equal_comparable<iterator, senitiel>);
     STATIC_CHECK(is_greater_equal_comparable<iterator, senitiel>);
+    STATIC_CHECK(std::is_same_v<iterator, senitiel>);
   }
 
   SECTION("comparisons")
@@ -88,7 +94,7 @@ TEMPLATE_LIST_TEST_CASE("generator iterators", "[generators][iterators]", AllIte
       CHECK(a != b);
     };
 
-    check(iterator{}, iterator{} + 1);
-    check(iterator{},senitiel{});
+    check(begin, iterator{} + 1);
+    check(begin, end);
   }
 }

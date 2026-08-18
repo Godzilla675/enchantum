@@ -21,7 +21,11 @@ namespace scoped {
 
     constexpr string_view remove_scope_or_empty(string_view string, const string_view type_name) noexcept
     {
-      const auto starts_with = [](auto a, auto b) { return a.substr(0, b.size()) == b; };
+      const auto starts_with = [](auto a, auto b) {
+        // The a.size() >= b.size() check is not necessary here, but it is needed
+        // to silence a warning in gcc 11.
+        return a.size() >= b.size() && a.substr(0, b.size()) == b;
+      };
       if (!starts_with(string, type_name))
         return string_view();
       string.remove_prefix(type_name.size());
